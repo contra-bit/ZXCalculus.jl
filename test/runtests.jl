@@ -9,6 +9,8 @@ end
 
 @testset "ZW Diagram Utilities" begin
     include("zw_utils.jl")
+@testset "plotting" begin
+  include("zx_plots.jl")
 end
 
 @testset "planar multigraphs.jl" begin

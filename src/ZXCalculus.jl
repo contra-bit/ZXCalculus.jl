@@ -37,6 +37,7 @@ export rewrite!,
     circuit_extraction,
     phase_teleportation
 export phase, spiders, rem_spider!
+export plot
 
 include("scalar.jl")
 
@@ -127,4 +128,6 @@ include("zw_diagram.jl")
 include("zw_utils.jl")
 end # module ZW
 
+
+include("plots/zx_plot.jl")
 end # module
