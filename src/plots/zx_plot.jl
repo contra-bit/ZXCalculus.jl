@@ -1,8 +1,11 @@
-include("zx_plot_compose.jl")
-include("zx_plot_vega.jl")
+
+module Plotting
+
+using ..ZXCalculus: AbstractZXDiagram
 
 function plot(zxd::AbstractZXDiagram; backend=:vega, kwargs...)
-  backend === :vega && return plot_vega(zxd; kwargs...)
-  backend === :compose && return plot_compose(zxd; kwargs...)
+  backend === :vega && return Plotting.plot(zxd; kwargs...)
+  # backend === :compose && return plot_compose(zxd; kwargs...)
 end
 
+end

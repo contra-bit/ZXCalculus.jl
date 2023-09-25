@@ -1,5 +1,6 @@
 using Test
 using ZXCalculus
+using ZXCalculus: Plotting
 using YaoHIR, YaoLocations
 using CompilerPluginTools
 
@@ -36,8 +37,8 @@ bir = BlockIR(ir, 4, c);
 zxd = convert_to_zxd(bir)
 zxg = ZXGraph(zxd)
 
-@test plot(zxd) !== nothing
-@test plot(zxg) !== nothing
+@test Plotting.plot(zxd) !== nothing
+@test Plotting.plot(zxg) !== nothing
 #plot_compose(zxd)
 #@test plot(zxd; backend = :compose) !== nothing
 #@test plot(zxg; backend = :compose) !== nothing
