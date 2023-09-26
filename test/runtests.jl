@@ -13,6 +13,10 @@ end
   include("zx_plots.jl")
 end
 
+@testset "qasm" begin
+  include("qasm.jl")
+end
+
 @testset "planar multigraphs.jl" begin
     include("planar_multigraph.jl")
 end

@@ -12,7 +12,9 @@ begin
 	Pkg.add(url="https://github.com/QuantumBFS/YaoHIR.jl", rev="master")
 	Pkg.add(url="https://github.com/QuantumBFS/YaoLocations.jl", rev="master")
 	Pkg.add(url="https://github.com/QuantumBFS/Multigraphs.jl")
-	Pkg.add(url="https://github.com/contra-bit/ZXCalculus.jl", rev="feature/plots")
+	#Pkg.add(url="https://github.com/contra-bit/ZXCalculus.jl", rev="feature/plots")
+	Pkg.add(url="/home/liam/src/quantum-circuits/software/ZXCalculus.jl")
+	
 end
 
 # ╔═╡ 512ac070-335e-45e9-a75d-e689af3ea59d
@@ -25,6 +27,9 @@ end
 
 # ╔═╡ a9bf8e31-686a-4057-acec-bd04e8b5a3dc
 using Multigraphs
+
+# ╔═╡ 0378329e-819e-4c70-b543-33d47f6455ee
+using OpenQASM
 
 # ╔═╡ fdfa8ed2-f19c-4b80-b64e-f4bb22d09327
 function Base.show(io::IO, mime::MIME"text/html", zx::Union{ZXDiagram, ZXGraph})
@@ -54,6 +59,12 @@ end
 
 # ╔═╡ 90b83d5e-e99a-11ea-1fb2-95c907668262
 md"# Simplify the ZX diagram"
+
+# ╔═╡ 64bff9ec-e9b5-11ea-3b23-c51d2149697a
+# ╠═╡ disabled = true
+#=╠═╡
+zxd = load_graph()
+  ╠═╡ =#
 
 # ╔═╡ 66eb6e1a-e99f-11ea-141c-a9017390524f
 md"apply the `lc` rule recursively"
@@ -200,28 +211,6 @@ function load_graph()
     push_gate!(zxd, Val(:CNOT), 3, 2)
 end
 
-# ╔═╡ 64bff9ec-e9b5-11ea-3b23-c51d2149697a
-zxd = load_graph()
-
-# ╔═╡ 5dbf9f96-e9a4-11ea-19d7-e15e7f2327c9
-tcount(zxd)
-
-# ╔═╡ db9a0d4e-e99e-11ea-22ab-1fead216dd07
-zxg = ZXGraph(zxd)
-
-# ╔═╡ a6b92942-e99a-11ea-227d-f9fe53f8a1cf
-# simplify!(Rule{:lc}(), zxd)  #  this should not pass! use `DRule` and `GRule` to distinguish them?
-simplify!(Rule{:lc}(), zxg)  # allow Rule(:lc) for simplicity.
-
-# ╔═╡ b739540e-e99a-11ea-2a04-abd99889cf92
-simplify!(Rule{:p1}(), zxg)  # does not have any effect?
-
-# ╔═╡ c6f809e8-e9b4-11ea-2dcb-57c4a1d65bb7
-zxg |> srule!(:lc) |> srule!(:p1) |> srule_once!(:pab)
-
-# ╔═╡ bd2b3364-e99a-11ea-06e7-4560cb873d2c
-replace!(Rule{:pab}(), zxg)  # this naming is not explict, what about `simplify_recursive!` and `simplily!`.
-
 # ╔═╡ b6eaa762-e9b5-11ea-145e-7b5fa6b01872
 zxd2 = load_graph()
 
@@ -278,6 +267,56 @@ push_gate!(zxd3, c)
 # ╔═╡ 7b850816-ea02-11ea-183c-5db2d670be24
 ZXDiagram(4) |> typeof
 
+# ╔═╡ ee87ca39-5b1a-4b3c-96ad-ee0df2833cd5
+md"""
+## Create ZXDiagram from QASM
+"""
+
+# ╔═╡ 64cb0092-d364-48b7-9514-a2b5c80701be
+begin
+	qasm = """
+	  OPENQASM 2.0;
+	  include "qelib1.inc";
+	  qreg q0[3];
+	  creg c0[2];
+	  h q0[0];
+	  h q0[1];
+	  x q0[2];
+	  h q0[2];
+	  CX q0[0], q0[2];
+	  h q0[0];
+	  measure q0[0] -> c0[0];
+	  CX q0[1], q0[2];
+	  h q0[1];
+	  measure q0[1] -> c0[1];
+	  """
+	  ast = OpenQASM.parse(qasm)
+	  bir = BlockIR(ast)
+	
+end
+
+# ╔═╡ a470d83b-c538-4a51-96c5-b957460d6023
+    zxd = ZXDiagram(bir)
+
+# ╔═╡ 5dbf9f96-e9a4-11ea-19d7-e15e7f2327c9
+tcount(zxd)
+
+# ╔═╡ db9a0d4e-e99e-11ea-22ab-1fead216dd07
+zxg = ZXGraph(zxd)
+
+# ╔═╡ a6b92942-e99a-11ea-227d-f9fe53f8a1cf
+# simplify!(Rule{:lc}(), zxd)  #  this should not pass! use `DRule` and `GRule` to distinguish them?
+simplify!(Rule{:lc}(), zxg)  # allow Rule(:lc) for simplicity.
+
+# ╔═╡ b739540e-e99a-11ea-2a04-abd99889cf92
+simplify!(Rule{:p1}(), zxg)  # does not have any effect?
+
+# ╔═╡ c6f809e8-e9b4-11ea-2dcb-57c4a1d65bb7
+zxg |> srule!(:lc) |> srule!(:p1) |> srule_once!(:pab)
+
+# ╔═╡ bd2b3364-e99a-11ea-06e7-4560cb873d2c
+replace!(Rule{:pab}(), zxg)  # this naming is not explict, what about `simplify_recursive!` and `simplily!`.
+
 # ╔═╡ Cell order:
 # ╠═8ab9b70a-e98d-11ea-239c-73dc659722c2
 # ╠═512ac070-335e-45e9-a75d-e689af3ea59d
@@ -327,3 +366,7 @@ ZXDiagram(4) |> typeof
 # ╠═581e847c-e9fd-11ea-3fd0-6bbc0f6efd56
 # ╠═2e84a5ce-e9fd-11ea-12d0-b3a3dd75a76f
 # ╠═7b850816-ea02-11ea-183c-5db2d670be24
+# ╠═ee87ca39-5b1a-4b3c-96ad-ee0df2833cd5
+# ╠═0378329e-819e-4c70-b543-33d47f6455ee
+# ╠═64cb0092-d364-48b7-9514-a2b5c80701be
+# ╠═a470d83b-c538-4a51-96c5-b957460d6023

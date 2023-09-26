@@ -9,17 +9,17 @@ using MLStyle
 using Graphs, Multigraphs
 
 using Graphs:
-    nv,
-    ne,
-    outneighbors,
-    inneighbors,
-    neighbors,
-    rem_edge!,
-    add_edge!,
-    has_edge,
-    degree,
-    indegree,
-    outdegree
+  nv,
+  ne,
+  outneighbors,
+  inneighbors,
+  neighbors,
+  rem_edge!,
+  add_edge!,
+  has_edge,
+  degree,
+  indegree,
+  outdegree
 
 import Graphs: has_vertex
 
@@ -31,13 +31,14 @@ export Rule, Match, Scalar
 export push_gate!, pushfirst_gate!, tcount
 export convert_to_chain, convert_to_zxd
 export rewrite!,
-    simplify!,
-    clifford_simplification,
-    full_reduction,
-    circuit_extraction,
-    phase_teleportation
+  simplify!,
+  clifford_simplification,
+  full_reduction,
+  circuit_extraction,
+  phase_teleportation
 export phase, spiders, rem_spider!
 export plot
+export BlockIR
 
 include("scalar.jl")
 
@@ -79,6 +80,24 @@ end # module ZXW
 using .ZXW: ZXWDiagram, CalcRule
 
 export ZXWDiagram, CalcRule
+using .ZXW:
+  ZXWDiagram,
+  ZXWSpiderType,
+  Parameter,
+  CalcRule,
+  PiUnit,
+  Factor,
+  Input,
+  Output,
+  W,
+  H,
+  D,
+  Z,
+  X,
+  rewrite!
+export ZXWSpiderType,
+  ZXWDiagram, Parameter, PiUnit, Factor, Input, Output, W, H, D, Z, X, CalcRule
+export substitute_variables!, expval_circ!, stack_zxwd!, concat!
 
 include("parameter.jl")
 
@@ -130,4 +149,7 @@ end # module ZW
 
 
 include("plots/zx_plot.jl")
+
+
+include("qasm.jl")
 end # module
