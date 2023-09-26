@@ -1,8 +1,7 @@
-using OpenQASM
 
 @testset "convert simple qasm file into BlockIR" begin
 
-  traditional = """
+  qasm = """
   OPENQASM 2.0;
   include "qelib1.inc";
   qreg q0[3];
@@ -19,23 +18,9 @@ using OpenQASM
   measure q0[1] -> c0[1];
   """
 
-  chain = Chain()
-  push_gate!(chain, Val(:H), 1)
-  push_gate!(chain, Val(:H), 2)
-  push_gate!(chain, Val(:X), 3)
-  push_gate!(chain, Val(:H), 3)
-  push_gate!(chain, Val(:CNOT), 1, 3)
-  push_gate!(chain, Val(:H), 1)
-  push_gate!(chain, Val(:CNOT), 2, 3)
-  push_gate!(chain, Val(:H), 1)
 
-  ast_t = OpenQASM.parse(traditional)
+  bir = BlockIR(qasm)
 
-  bir = BlockIR(ast_t)
-
-  @testset "conversion" begin
-#    @test chain == bir.circuit
-  end
 
 
   @testset "correct parsing" begin
@@ -48,8 +33,38 @@ using OpenQASM
   end
 
 
+  @testset "matrix from zxd" begin
+    # TODO Fix matrix from ZXDiagram
+    #  m = Matrix(zxd)
+  end
+
+  zxwd = convert_to_zxwd(bir)
+
+  @testset "convert into ZXWDiagram" begin
+    @test zxwd !== nothing
+  end
+
+  @testset "matrix from zxwd" begin
+    m = Matrix(zxwd)
+  end
+
   @testset "plot new ZXDiagram" begin
     @test plot(zxd) !== nothing
+  end
+
+
+  chain = Chain()
+  push_gate!(chain, Val(:H), 1)
+  push_gate!(chain, Val(:H), 2)
+  push_gate!(chain, Val(:X), 3)
+  push_gate!(chain, Val(:H), 3)
+  push_gate!(chain, Val(:CNOT), 1, 3)
+  push_gate!(chain, Val(:H), 1)
+  push_gate!(chain, Val(:CNOT), 2, 3)
+  push_gate!(chain, Val(:H), 1)
+
+  @testset "conversion" begin
+    #    @test chain == bir.circuit
   end
 
 end

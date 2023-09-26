@@ -40,6 +40,9 @@ export phase, spiders, rem_spider!
 export plot
 export BlockIR
 
+# FIXME Remove due to  WARNING: import of ZXW.ZXWDiagram into ZXCalculus conflicts with an existing identifier; ignored.
+export convert_to_zxwd
+
 include("scalar.jl")
 
 include("phase.jl")
@@ -104,7 +107,6 @@ include("planar_multigraph.jl")
 
 
 include("plots/zx_plot.jl")
-
 
 include("qasm.jl")
 end # module
