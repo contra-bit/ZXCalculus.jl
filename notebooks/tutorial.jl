@@ -10,10 +10,11 @@ begin
 	Pkg.add(url="https://github.com/Roger-luo/Expronicon.jl")  
 	Pkg.add(url="https://github.com/JuliaCompilerPlugins/CompilerPluginTools.jl")
 	Pkg.add(url="https://github.com/QuantumBFS/YaoHIR.jl", rev="master")
+	Pkg.add(url="/home/liam/src/quantum-circuits/software/OpenQASM.jl")
 	Pkg.add(url="https://github.com/QuantumBFS/YaoLocations.jl", rev="master")
 	Pkg.add(url="https://github.com/QuantumBFS/Multigraphs.jl")
 	#Pkg.add(url="https://github.com/contra-bit/ZXCalculus.jl", rev="feature/plots")
-	Pkg.add(url="/home/liam/src/quantum-circuits/software/ZXCalculus.jl")
+	Pkg.add(url="/home/liam/src/quantum-circuits/software/ZXCalculus.jl", rev="feat/convert_to_zxwd")
 	
 end
 
@@ -30,6 +31,9 @@ using Multigraphs
 
 # ╔═╡ 0378329e-819e-4c70-b543-33d47f6455ee
 using OpenQASM
+
+# ╔═╡ 4afff84d-ceb7-4427-b25b-df9dc2a08cde
+using ZXCalculus: BlockIR
 
 # ╔═╡ fdfa8ed2-f19c-4b80-b64e-f4bb22d09327
 function Base.show(io::IO, mime::MIME"text/html", zx::Union{ZXDiagram, ZXGraph})
@@ -60,11 +64,11 @@ end
 # ╔═╡ 90b83d5e-e99a-11ea-1fb2-95c907668262
 md"# Simplify the ZX diagram"
 
-# ╔═╡ 64bff9ec-e9b5-11ea-3b23-c51d2149697a
-# ╠═╡ disabled = true
-#=╠═╡
-zxd = load_graph()
-  ╠═╡ =#
+# ╔═╡ 5dbf9f96-e9a4-11ea-19d7-e15e7f2327c9
+tcount(zxd)
+
+# ╔═╡ db9a0d4e-e99e-11ea-22ab-1fead216dd07
+zxg = ZXGraph(zxd)
 
 # ╔═╡ 66eb6e1a-e99f-11ea-141c-a9017390524f
 md"apply the `lc` rule recursively"
@@ -74,6 +78,10 @@ html"""
 <img src="https://user-images.githubusercontent.com/6257240/91627348-c8151080-e984-11ea-9263-849b2c98d88f.png" width=500/>
 """
 
+# ╔═╡ a6b92942-e99a-11ea-227d-f9fe53f8a1cf
+# simplify!(Rule{:lc}(), zxd)  #  this should not pass! use `DRule` and `GRule` to distinguish them?
+simplify!(Rule{:lc}(), zxg)  # allow Rule(:lc) for simplicity.
+
 # ╔═╡ 86475062-e99f-11ea-2f44-a3c270cc45e5
 md"apply the p1 rule recursively"
 
@@ -82,11 +90,17 @@ html"""
 <img src="https://user-images.githubusercontent.com/6257240/91627385-04e10780-e985-11ea-81c3-d50e057e3795.png" width=600/>
 """
 
+# ╔═╡ b739540e-e99a-11ea-2a04-abd99889cf92
+simplify!(Rule{:p1}(), zxg)  # does not have any effect?
+
 # ╔═╡ 7af70558-e9b4-11ea-3aa9-3b73357f0a2a
 srule!(sym::Symbol) = g -> simplify!(Rule{sym}(), g)
 
 # ╔═╡ a5784394-e9b4-11ea-0e68-8d8211766409
 srule_once!(sym::Symbol) = g -> replace!(Rule{sym}(), g)
+
+# ╔═╡ c6f809e8-e9b4-11ea-2dcb-57c4a1d65bb7
+zxg |> srule!(:lc) |> srule!(:p1) |> srule_once!(:pab)
 
 # ╔═╡ 25d876b6-e9a9-11ea-2631-fd6f8934daa6
 md"apply the `pab` rule once"
@@ -95,6 +109,9 @@ md"apply the `pab` rule once"
 html"""
 <img src="https://user-images.githubusercontent.com/6257240/91627574-5a69e400-e986-11ea-93bf-1d45f09b5967.png" width=600/>
 """
+
+# ╔═╡ bd2b3364-e99a-11ea-06e7-4560cb873d2c
+replace!(Rule{:pab}(), zxg)  # this naming is not explict, what about `simplify_recursive!` and `simplily!`.
 
 # ╔═╡ c71cdf4c-e9b5-11ea-2aaf-5f4be0eb3e93
 md"## To make life easier"
@@ -250,13 +267,10 @@ end
 
 # ╔═╡ 71fc6836-3c30-43de-aa2b-2d3d48bdb3da
 begin
-	  ir_t = @make_ircode begin end
-	  bir_t = BlockIR(ir_t, 4, chain_t)
-	  zxd_t = convert_to_zxd(bir_t)
+	  ir_test = @make_ircode begin end
+	  bir_test = BlockIR(ir_test, 4, chain_t)
+	  zxd_test = convert_to_zxd(bir_test)
 end
-
-# ╔═╡ 31753c83-847a-4c2a-a6b3-8be6aaa8f792
-zxg_t = ZXGraph(zxd_t)
 
 # ╔═╡ 581e847c-e9fd-11ea-3fd0-6bbc0f6efd56
 c = qft_circuit(4)
@@ -272,9 +286,12 @@ md"""
 ## Create ZXDiagram from QASM
 """
 
+# ╔═╡ 217d328b-58c6-4ff9-8e13-6a59b8889f2f
+
+
 # ╔═╡ 64cb0092-d364-48b7-9514-a2b5c80701be
 begin
-	qasm = """
+	qasm_o = """
 	  OPENQASM 2.0;
 	  include "qelib1.inc";
 	  qreg q0[3];
@@ -290,32 +307,62 @@ begin
 	  h q0[1];
 	  measure q0[1] -> c0[1];
 	  """
-	  ast = OpenQASM.parse(qasm)
-	  bir = BlockIR(ast)
+
+	qasm_t = """
+	OPENQASM 2.0;
+ 	include "qelib1.inc";
+ 	qreg q0[3];
+  	creg mcm[1];
+ 	creg end[1];
+  	h q0[1];
+ 	x q0[2];
+ 	h q0[2];
+	CX q0[1],q0[2];
+ 	h q0[1];
+	measure q0[1] -> mcm[0];
+ 	h q0[0];
+  	CX q0[0],q0[2];
+  	h q0[0];
+ 	measure q0[0] -> end[0];
+	"""
+	
+	  ast_o = OpenQASM.parse(qasm_o)
+	  bir_o = BlockIR(ast_o)
+	  ast_t = OpenQASM.parse(qasm_t)
+	  bir_t = BlockIR(ast_t)
 	
 end
 
 # ╔═╡ a470d83b-c538-4a51-96c5-b957460d6023
-    zxd = ZXDiagram(bir)
+    zxd_o = ZXDiagram(bir_o)
 
-# ╔═╡ 5dbf9f96-e9a4-11ea-19d7-e15e7f2327c9
-tcount(zxd)
+# ╔═╡ 960e80b3-efaf-4c49-b2c6-4849dd0a0ef4
+begin
+	zxd_t = ZXDiagram(bir_t)
+	push_gate!(zxd_t, Val{:SWAP}(), [1, 2])
+	
+end
 
-# ╔═╡ db9a0d4e-e99e-11ea-22ab-1fead216dd07
-zxg = ZXGraph(zxd)
+# ╔═╡ 31753c83-847a-4c2a-a6b3-8be6aaa8f792
+zxg_t = ZXGraph(zxd_t)
 
-# ╔═╡ a6b92942-e99a-11ea-227d-f9fe53f8a1cf
-# simplify!(Rule{:lc}(), zxd)  #  this should not pass! use `DRule` and `GRule` to distinguish them?
-simplify!(Rule{:lc}(), zxg)  # allow Rule(:lc) for simplicity.
+# ╔═╡ 77afd45a-47e1-4cab-a731-3298351b693d
+zxwd_o = convert_to_zxwd(bir_o)
 
-# ╔═╡ b739540e-e99a-11ea-2a04-abd99889cf92
-simplify!(Rule{:p1}(), zxg)  # does not have any effect?
+# ╔═╡ 4b54309c-c3e8-402c-a74f-acbdfc3ef046
+zxwd_t = convert_to_zxwd(bir_t)
 
-# ╔═╡ c6f809e8-e9b4-11ea-2dcb-57c4a1d65bb7
-zxg |> srule!(:lc) |> srule!(:p1) |> srule_once!(:pab)
+# ╔═╡ 553b216e-2180-475f-928c-eda378b6acae
 
-# ╔═╡ bd2b3364-e99a-11ea-06e7-4560cb873d2c
-replace!(Rule{:pab}(), zxg)  # this naming is not explict, what about `simplify_recursive!` and `simplily!`.
+
+# ╔═╡ 1b373f50-92bf-4552-b829-1d9959a9885b
+m_o = Matrix(zxwd_o)
+
+# ╔═╡ 92965f5c-14b4-4e28-aff0-54aa476e948d
+m_t = Matrix(zxwd_t)
+
+# ╔═╡ 7cf94474-213d-4c8e-96f1-1781023718fb
+m_o ≈ m_t
 
 # ╔═╡ Cell order:
 # ╠═8ab9b70a-e98d-11ea-239c-73dc659722c2
@@ -330,7 +377,6 @@ replace!(Rule{:pab}(), zxg)  # this naming is not explict, what about `simplify_
 # ╠═a9bf8e31-686a-4057-acec-bd04e8b5a3dc
 # ╠═b9d32b41-8bff-4faa-b198-db096582fb2e
 # ╟─90b83d5e-e99a-11ea-1fb2-95c907668262
-# ╠═64bff9ec-e9b5-11ea-3b23-c51d2149697a
 # ╠═5dbf9f96-e9a4-11ea-19d7-e15e7f2327c9
 # ╠═db9a0d4e-e99e-11ea-22ab-1fead216dd07
 # ╟─66eb6e1a-e99f-11ea-141c-a9017390524f
@@ -368,5 +414,14 @@ replace!(Rule{:pab}(), zxg)  # this naming is not explict, what about `simplify_
 # ╠═7b850816-ea02-11ea-183c-5db2d670be24
 # ╠═ee87ca39-5b1a-4b3c-96ad-ee0df2833cd5
 # ╠═0378329e-819e-4c70-b543-33d47f6455ee
+# ╠═217d328b-58c6-4ff9-8e13-6a59b8889f2f
+# ╠═4afff84d-ceb7-4427-b25b-df9dc2a08cde
 # ╠═64cb0092-d364-48b7-9514-a2b5c80701be
 # ╠═a470d83b-c538-4a51-96c5-b957460d6023
+# ╠═960e80b3-efaf-4c49-b2c6-4849dd0a0ef4
+# ╠═77afd45a-47e1-4cab-a731-3298351b693d
+# ╠═4b54309c-c3e8-402c-a74f-acbdfc3ef046
+# ╠═553b216e-2180-475f-928c-eda378b6acae
+# ╠═1b373f50-92bf-4552-b829-1d9959a9885b
+# ╠═92965f5c-14b4-4e28-aff0-54aa476e948d
+# ╠═7cf94474-213d-4c8e-96f1-1781023718fb
