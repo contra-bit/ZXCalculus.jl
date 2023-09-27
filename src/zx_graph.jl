@@ -100,6 +100,18 @@ function ZXGraph(zxd::ZXDiagram{T, P}) where {T, P}
     return zxg
 end
 
+function ZXDiagram(zxg::ZXGraph{T, P}) where {T, P}
+    zxd = ZXDiagram{T, P}(copy(zxg.mg), copy(zxg.st), copy(zxg.ps), copy(zxg.layout),
+        copy(zxg.scalar), copy(zxg.inputs), copy(zxg.outputs)
+    )
+    for e in collect(edges(zxd.mg))
+        v1 = src(e)
+        v2 = dst(e)
+        is_hadamard(zxg, v1, v2) && insert_spider!(zxd, v1, v2, SpiderType.H)
+    end
+    return zxd
+end
+
 Graphs.has_edge(zxg::ZXGraph, vs...) = has_edge(zxg.mg, vs...)
 Graphs.nv(zxg::ZXGraph) = nv(zxg.mg)
 Graphs.ne(zxg::ZXGraph) = ne(zxg.mg)
