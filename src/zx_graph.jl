@@ -116,7 +116,6 @@ function ZXDiagram(zxg::ZXGraph{T, P}) where {T, P}
 end
 
 
-is_in_or_out_spider(st::SpiderType.SType) = st == SpiderType.In || st == SpiderType.Out
 
 Graphs.has_edge(zxg::ZXGraph, vs...) = has_edge(zxg.mg, vs...)
 Graphs.nv(zxg::ZXGraph) = nv(zxg.mg)

@@ -19,6 +19,9 @@ begin
 	
 end
 
+# ╔═╡ e0f2d65f-8927-4717-96ce-2caf912daca9
+using Revise
+
 # ╔═╡ 512ac070-335e-45e9-a75d-e689af3ea59d
 begin
 	  using ZXCalculus
@@ -38,12 +41,6 @@ using ZXCalculus: BlockIR
 
 # ╔═╡ 1b2635ed-a985-42a3-842a-4aec30df9186
 using MLStyle
-
-# ╔═╡ fdfa8ed2-f19c-4b80-b64e-f4bb22d09327
-function Base.show(io::IO, mime::MIME"text/html", zx::Union{ZXDiagram, ZXGraph})
-       g = plot(zx)
-       Base.show(io, mime, g)
-end
 
 # ╔═╡ 227f7884-e99a-11ea-3a90-0beb697a2da6
 md"# Construct a ZX diagram"
@@ -428,13 +425,44 @@ contains_only_bare_wires(reduced_t)
 # ╔═╡ ac7e74d4-bb38-4819-9b1a-e0c78be0996b
 spider_sequence(reduced_o)
 
-# ╔═╡ dfbf87be-6e16-4fe2-9b0c-f06c7b228715
-function append_adjoint_diagram(zxd1, zxd_1)
+# ╔═╡ 08da0806-d7a4-4c45-bdca-a0180b441c42
+invert_phases!(reduced_t)
+
+# ╔═╡ 23ad454f-7570-4ff8-a999-5998b464621f
+function push_spider_to_diagram!(zxd, qubit, ps, st)
+    p = rem(ps + 1, 2)
+    @info st
+    @info p
 
 end
 
-# ╔═╡ 08da0806-d7a4-4c45-bdca-a0180b441c42
-invert_phases!(reduced_t)
+# ╔═╡ 2143019e-18b6-4639-b903-16c00c9277a5
+push_spider_to_diagram!(zxd_t, 4, zxd_t.ps[15], zxd_t.st[15])
+
+# ╔═╡ 0cd6f92c-c0bb-454d-b316-a458b94b3f1f
+zxd_t
+
+# ╔═╡ 13fb6d28-98fb-4394-b767-30eda220f594
+# define new diagram e 
+# obtain spider sequcence for d1 and d2
+# add spider of d1 to d
+# add inverse spider of d2 to d
+# reduce
+
+# ╔═╡ f65513c0-ac67-4b00-9da7-05c5dc6a61b8
+new = ZXDiagram(4)
+
+# ╔═╡ 07fd2851-1703-4422-a495-ad3dda534c73
+zxd_1 = zxd_t
+
+# ╔═╡ 1b62520c-1bbb-4984-9108-8bb430fe2834
+qubit_loc(zxd::ZXDiagram{T, P}, v::T) where {T, P} = qubit_loc(zxd.layout, v)
+
+# ╔═╡ e7e3d602-6622-4f01-891e-19802ec008fb
+convert_to_chain(zxd_1)
+
+# ╔═╡ 90bef68b-7fe8-4a37-9592-483d22dcae8a
+append_adjoint_diagram!(zxd_t, zxd_o)
 
 # ╔═╡ Cell order:
 # ╠═8ab9b70a-e98d-11ea-239c-73dc659722c2
@@ -515,5 +543,15 @@ invert_phases!(reduced_t)
 # ╠═33207623-d491-492d-9f51-a87079dc9d0d
 # ╠═44d1b8e3-a30c-408b-b766-819a75a354bc
 # ╠═ac7e74d4-bb38-4819-9b1a-e0c78be0996b
-# ╠═dfbf87be-6e16-4fe2-9b0c-f06c7b228715
 # ╠═08da0806-d7a4-4c45-bdca-a0180b441c42
+# ╠═23ad454f-7570-4ff8-a999-5998b464621f
+# ╠═c486d3f1-4696-419d-8863-6f412718db2b
+# ╠═2143019e-18b6-4639-b903-16c00c9277a5
+# ╠═0cd6f92c-c0bb-454d-b316-a458b94b3f1f
+# ╠═13fb6d28-98fb-4394-b767-30eda220f594
+# ╠═f65513c0-ac67-4b00-9da7-05c5dc6a61b8
+# ╠═07fd2851-1703-4422-a495-ad3dda534c73
+# ╠═1b62520c-1bbb-4984-9108-8bb430fe2834
+# ╠═e7e3d602-6622-4f01-891e-19802ec008fb
+# ╠═e0f2d65f-8927-4717-96ce-2caf912daca9
+# ╠═90bef68b-7fe8-4a37-9592-483d22dcae8a
