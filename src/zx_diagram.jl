@@ -655,13 +655,7 @@ end
 
 
 function invert_phase!(zxd, v)
-  p = phase(zxd, v)
-  # Create inverse of phase gate by inverting the phase
-  p_inv = rem(2 - p,  2)
-  # Phase + Inv_Phase = 0
-  p_new = rem(p + p_inv, 2)
-  p_new == 0 || throw(ArgumentError("failed to calculate inverse phase"))
-  p_new
+  -phase(zxd, v)
 end
 
 
