@@ -243,6 +243,7 @@ function insert_spider!(
 end
 
 spiders(zxwd::ZXWDiagram) = vertices(zxwd.mg)
+spiders(zxd::Union{ZXDiagram, ZXGraph}) = vertices(zxd.mg)
 
 """
     get_inputs(zxwd)
