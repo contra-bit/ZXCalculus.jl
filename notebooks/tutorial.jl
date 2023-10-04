@@ -42,6 +42,12 @@ using ZXCalculus: BlockIR
 # ╔═╡ 1b2635ed-a985-42a3-842a-4aec30df9186
 using MLStyle
 
+# ╔═╡ 0b9a6c7a-0783-4a65-bd1d-e4d89b1b8c55
+function Base.show(io::IO, mime::MIME"text/html", zx::Union{ZXDiagram, ZXGraph})
+       g = plot(zx)
+       Base.show(io, mime, g)
+end
+
 # ╔═╡ 227f7884-e99a-11ea-3a90-0beb697a2da6
 md"# Construct a ZX diagram"
 
@@ -459,15 +465,30 @@ zxd_1 = zxd_t
 qubit_loc(zxd::ZXDiagram{T, P}, v::T) where {T, P} = qubit_loc(zxd.layout, v)
 
 # ╔═╡ e7e3d602-6622-4f01-891e-19802ec008fb
-convert_to_chain(zxd_1)
+zxd_1
 
 # ╔═╡ 90bef68b-7fe8-4a37-9592-483d22dcae8a
-append_adjoint_diagram!(zxd_t, zxd_o)
+concat = append_adjoint_diagram!(zxd_t, zxd_o)
+
+# ╔═╡ 5bee8d6f-17c5-420c-bcac-2c853bef8166
+
+
+# ╔═╡ 41c4aa8c-12ab-4086-b7fe-3372f06c973a
+concat_full_reduction = full_reduction(concat)
+
+# ╔═╡ b5198e92-9ded-4963-8a93-045102c52943
+replace!(Rule{:i1}(), ZXDiagram(concat_full_reduction))
+
+# ╔═╡ 4e1fc8ce-87d6-4a11-8d95-e85663ef718b
+show(concat_full_reduction)
+
+# ╔═╡ 94c66dbc-c3e4-4088-be76-fce0b46d876b
+contains_only_bare_wires(concat_full_reduction)
 
 # ╔═╡ Cell order:
 # ╠═8ab9b70a-e98d-11ea-239c-73dc659722c2
 # ╠═512ac070-335e-45e9-a75d-e689af3ea59d
-# ╠═fdfa8ed2-f19c-4b80-b64e-f4bb22d09327
+# ╠═0b9a6c7a-0783-4a65-bd1d-e4d89b1b8c55
 # ╟─227f7884-e99a-11ea-3a90-0beb697a2da6
 # ╠═49d6e6ac-e994-11ea-2ac5-27ab8242e297
 # ╠═51e72d20-e994-11ea-1a50-854039f728aa
@@ -545,7 +566,6 @@ append_adjoint_diagram!(zxd_t, zxd_o)
 # ╠═ac7e74d4-bb38-4819-9b1a-e0c78be0996b
 # ╠═08da0806-d7a4-4c45-bdca-a0180b441c42
 # ╠═23ad454f-7570-4ff8-a999-5998b464621f
-# ╠═c486d3f1-4696-419d-8863-6f412718db2b
 # ╠═2143019e-18b6-4639-b903-16c00c9277a5
 # ╠═0cd6f92c-c0bb-454d-b316-a458b94b3f1f
 # ╠═13fb6d28-98fb-4394-b767-30eda220f594
@@ -555,3 +575,8 @@ append_adjoint_diagram!(zxd_t, zxd_o)
 # ╠═e7e3d602-6622-4f01-891e-19802ec008fb
 # ╠═e0f2d65f-8927-4717-96ce-2caf912daca9
 # ╠═90bef68b-7fe8-4a37-9592-483d22dcae8a
+# ╟─5bee8d6f-17c5-420c-bcac-2c853bef8166
+# ╠═41c4aa8c-12ab-4086-b7fe-3372f06c973a
+# ╠═b5198e92-9ded-4963-8a93-045102c52943
+# ╠═4e1fc8ce-87d6-4a11-8d95-e85663ef718b
+# ╠═94c66dbc-c3e4-4088-be76-fce0b46d876b
