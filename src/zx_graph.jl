@@ -115,6 +115,9 @@ function ZXDiagram(zxg::ZXGraph{T, P}) where {T, P}
     return zxd
 end
 
+
+is_in_or_out_spider(st::SpiderType.SType) = st == SpiderType.In || st == SpiderType.Out
+
 Graphs.has_edge(zxg::ZXGraph, vs...) = has_edge(zxg.mg, vs...)
 Graphs.nv(zxg::ZXGraph) = nv(zxg.mg)
 Graphs.ne(zxg::ZXGraph) = ne(zxg.mg)
@@ -124,6 +127,7 @@ Graphs.neighbors(zxg::ZXGraph, v::Integer) = neighbors(zxg.mg, v)
 Graphs.degree(zxg::ZXGraph, v::Integer) = degree(zxg.mg, v)
 Graphs.indegree(zxg::ZXGraph, v::Integer) = degree(zxg, v)
 Graphs.outdegree(zxg::ZXGraph, v::Integer) = degree(zxg, v)
+
 function Graphs.rem_edge!(zxg::ZXGraph, v1::Integer, v2::Integer)
     if rem_edge!(zxg.mg, v1, v2)
         delete!(zxg.et, (min(v1, v2), max(v1, v2)))
@@ -283,6 +287,8 @@ function round_phases!(zxg::ZXGraph{T, P}) where {T<:Integer, P}
     end
 end
 
+
+
 """
     is_interior(zxg::ZXGraph, v)
 
@@ -393,4 +399,3 @@ function add_power!(zxg::ZXGraph, n)
 end
 
 
-is_in_or_out_spider(st::SpiderType.SType) = st == SpiderType.In || st == SpiderType.Out

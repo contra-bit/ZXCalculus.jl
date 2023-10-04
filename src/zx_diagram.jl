@@ -630,3 +630,15 @@ function safe_convert(::Type{T}, x::Real) where T<:Rational
     @warn "converting phase to rational, but with rounding error $(abs(fr-x))."
     return fr
 end
+
+
+function invert_phases!(zxd::AbstractZXDiagram) 
+  ps = zxd.ps
+  for v in keys(ps)
+    new_p = rem(ps[v] + 1, 2)
+    set_phase!(zxd, v, new_p)
+  end
+  zxd
+end
+
+is_in_or_out_spider(st::SpiderType.SType) = st == SpiderType.In || st == SpiderType.Out

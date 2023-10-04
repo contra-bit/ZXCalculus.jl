@@ -90,4 +90,3 @@ Base.copy(zxwd::ZXWDiagram{T,P}) where {T,P} = ZXWDiagram{T,P}(
 )
 
 
-is_in_or_out_spider(st::SpiderType.SType) = st == SpiderType.In || st == SpiderType.Out

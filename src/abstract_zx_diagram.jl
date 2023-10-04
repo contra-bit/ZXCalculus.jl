@@ -42,3 +42,5 @@ insert_spider!(zxd::AbstractZXDiagram, args...) = throw(MethodError(ZXCalculus.i
 
 
 contains_only_bare_wires(zxd::AbstractZXDiagram) = all(is_in_or_out_spider(st[2]) for st in zxd.st )
+
+
