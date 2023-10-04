@@ -346,7 +346,7 @@ end
 # ╔═╡ 960e80b3-efaf-4c49-b2c6-4849dd0a0ef4
 begin
 	zxd_t = ZXDiagram(bir_t)
-	push_gate!(zxd_t, Val{:SWAP}(), [1, 2])
+	#push_gate!(zxd_t, Val{:SWAP}(), [1, 2])
 	
 end
 
@@ -433,6 +433,9 @@ function append_adjoint_diagram(zxd1, zxd_1)
 
 end
 
+# ╔═╡ 08da0806-d7a4-4c45-bdca-a0180b441c42
+invert_phases!(reduced_t)
+
 # ╔═╡ Cell order:
 # ╠═8ab9b70a-e98d-11ea-239c-73dc659722c2
 # ╠═512ac070-335e-45e9-a75d-e689af3ea59d
@@ -513,3 +516,4 @@ end
 # ╠═44d1b8e3-a30c-408b-b766-819a75a354bc
 # ╠═ac7e74d4-bb38-4819-9b1a-e0c78be0996b
 # ╠═dfbf87be-6e16-4fe2-9b0c-f06c7b228715
+# ╠═08da0806-d7a4-4c45-bdca-a0180b441c42
