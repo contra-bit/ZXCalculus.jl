@@ -37,7 +37,7 @@ export rewrite!,
   circuit_extraction,
   phase_teleportation
 export phase, spiders, rem_spider!
-export contains_only_bare_wires, spider_sequence, invert_phases!
+export contains_only_bare_wires, spider_sequence, invert_phases!, append_adjoint_diagram!
 export plot
 export BlockIR
 

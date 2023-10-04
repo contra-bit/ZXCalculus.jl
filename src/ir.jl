@@ -216,3 +216,5 @@ function convert_to_chain(circ::ZXDiagram{TT,P}) where {TT,P}
   return Chain(qc...)
 end
 
+
+is_in_or_out_spider(st::SpiderType.SType) = st == SpiderType.In || st == SpiderType.Out

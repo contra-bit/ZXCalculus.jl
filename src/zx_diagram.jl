@@ -635,10 +635,84 @@ end
 function invert_phases!(zxd::AbstractZXDiagram) 
   ps = zxd.ps
   for v in keys(ps)
-    new_p = rem(ps[v] + 1, 2)
-    set_phase!(zxd, v, new_p)
+    set_phase!(zxd, v,  rem(ps[v] + 1, 2))
   end
   zxd
 end
 
-is_in_or_out_spider(st::SpiderType.SType) = st == SpiderType.In || st == SpiderType.Out
+
+function stype_to_val(st)
+  if st == SpiderType.Z
+    Val{:Z}()
+  elseif st == SpiderType.X
+    Val{:X}()
+  elseif st == SpiderType.H
+    Val{:H}()
+  else
+    nothing
+  end
+end
+
+
+function invert_phase!(zxd, v)
+  p = phase(zxd, v)
+  # Create inverse of phase gate by inverting the phase
+  p_inv = rem(2 - p,  2)
+  # Phase + Inv_Phase = 0
+  p_new = rem(p + p_inv, 2)
+  p_new == 0 || throw(ArgumentError("failed to calculate inverse phase"))
+  p_new
+end
+
+function append_adjoint_diagram!(zxd_1, zxd_2)
+  q = nqubits(zxd_1)
+  q == nqubits(zxd_2) || throw(ArgumentError("number of qubits need to be equal, go $q and $(nqubits(zxd_2))"))
+  zxd_new = ZXDiagram(q)
+  for vs in spider_sequence(zxd_1)
+    if length(vs) == 1
+      v = vs
+      q = Int(qubit_loc(zxd_1, v))
+      p_inv = invert_phase!(zxd_1, v)
+      st = spider_type(zxd_1, v)
+      gate_val = stype_to_val(st)
+      @info st
+      @info gate_val
+      if st == SpiderType.H
+        gate_val !== nothing && push_gate!(zxd_new, gate_val, q)
+      else
+        gate_val !== nothing && push_gate!(zxd_new, gate_val, q, p_inv)
+      end
+
+
+    elseif length(vs) == 2
+      v1, v2 = vs
+      q1 = Int(qubit_loc(zxd_1, v1))
+      q2 = Int(qubit_loc(zxd_1, v2))
+      st1 = spider_type(zxd_1, v1)
+      gate_val1 = stype_to_val(st1)
+      st2 = spider_type(zxd_1, v2)
+      gate_val2 = stype_to_val(st2)
+      p1 = invert_phase!(zxd_1, v1)
+      p2 = invert_phase!(zxd_1, v2)
+      @info st1
+      @info gate_val1
+      @info st2
+      @info gate_val2
+      if gate_val1 !== nothing
+        if st1 == SpiderType.H
+          push_gate!(zxd_new, gate_val1, q1)
+        else
+          push_gate!(zxd_new, gate_val1, q1, p1)
+        end
+      end
+      if gate_val2 !== nothing
+        if st2 == SpiderType.H
+          push_gate!(zxd_new, gate_val2, q2)
+        else
+          push_gate!(zxd_new, gate_val2, q2, p2)
+        end
+      end
+    end
+  end
+  zxd_new
+end
