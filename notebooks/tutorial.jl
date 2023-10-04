@@ -7,6 +7,7 @@ using InteractiveUtils
 # ╔═╡ 8ab9b70a-e98d-11ea-239c-73dc659722c2
 begin
 	import Pkg
+	Pkg.activate(mktempdir())
 	Pkg.add(url="https://github.com/Roger-luo/Expronicon.jl")  
 	Pkg.add(url="https://github.com/JuliaCompilerPlugins/CompilerPluginTools.jl")
 	Pkg.add(url="https://github.com/QuantumBFS/YaoHIR.jl", rev="master")
@@ -34,6 +35,9 @@ using OpenQASM
 
 # ╔═╡ 4afff84d-ceb7-4427-b25b-df9dc2a08cde
 using ZXCalculus: BlockIR
+
+# ╔═╡ 1b2635ed-a985-42a3-842a-4aec30df9186
+using MLStyle
 
 # ╔═╡ fdfa8ed2-f19c-4b80-b64e-f4bb22d09327
 function Base.show(io::IO, mime::MIME"text/html", zx::Union{ZXDiagram, ZXGraph})
@@ -64,12 +68,6 @@ end
 # ╔═╡ 90b83d5e-e99a-11ea-1fb2-95c907668262
 md"# Simplify the ZX diagram"
 
-# ╔═╡ 5dbf9f96-e9a4-11ea-19d7-e15e7f2327c9
-tcount(zxd)
-
-# ╔═╡ db9a0d4e-e99e-11ea-22ab-1fead216dd07
-zxg = ZXGraph(zxd)
-
 # ╔═╡ 66eb6e1a-e99f-11ea-141c-a9017390524f
 md"apply the `lc` rule recursively"
 
@@ -77,10 +75,6 @@ md"apply the `lc` rule recursively"
 html"""
 <img src="https://user-images.githubusercontent.com/6257240/91627348-c8151080-e984-11ea-9263-849b2c98d88f.png" width=500/>
 """
-
-# ╔═╡ a6b92942-e99a-11ea-227d-f9fe53f8a1cf
-# simplify!(Rule{:lc}(), zxd)  #  this should not pass! use `DRule` and `GRule` to distinguish them?
-simplify!(Rule{:lc}(), zxg)  # allow Rule(:lc) for simplicity.
 
 # ╔═╡ 86475062-e99f-11ea-2f44-a3c270cc45e5
 md"apply the p1 rule recursively"
@@ -90,17 +84,11 @@ html"""
 <img src="https://user-images.githubusercontent.com/6257240/91627385-04e10780-e985-11ea-81c3-d50e057e3795.png" width=600/>
 """
 
-# ╔═╡ b739540e-e99a-11ea-2a04-abd99889cf92
-simplify!(Rule{:p1}(), zxg)  # does not have any effect?
-
 # ╔═╡ 7af70558-e9b4-11ea-3aa9-3b73357f0a2a
 srule!(sym::Symbol) = g -> simplify!(Rule{sym}(), g)
 
 # ╔═╡ a5784394-e9b4-11ea-0e68-8d8211766409
 srule_once!(sym::Symbol) = g -> replace!(Rule{sym}(), g)
-
-# ╔═╡ c6f809e8-e9b4-11ea-2dcb-57c4a1d65bb7
-zxg |> srule!(:lc) |> srule!(:p1) |> srule_once!(:pab)
 
 # ╔═╡ 25d876b6-e9a9-11ea-2631-fd6f8934daa6
 md"apply the `pab` rule once"
@@ -109,9 +97,6 @@ md"apply the `pab` rule once"
 html"""
 <img src="https://user-images.githubusercontent.com/6257240/91627574-5a69e400-e986-11ea-93bf-1d45f09b5967.png" width=600/>
 """
-
-# ╔═╡ bd2b3364-e99a-11ea-06e7-4560cb873d2c
-replace!(Rule{:pab}(), zxg)  # this naming is not explict, what about `simplify_recursive!` and `simplily!`.
 
 # ╔═╡ c71cdf4c-e9b5-11ea-2aaf-5f4be0eb3e93
 md"## To make life easier"
@@ -227,6 +212,28 @@ function load_graph()
     push_gate!(zxd, Val(:Z), 3, 1//2)
     push_gate!(zxd, Val(:CNOT), 3, 2)
 end
+
+# ╔═╡ 9b69f77f-21b9-4c13-94db-a6e7c2bd21dd
+zxd = load_graph()
+
+# ╔═╡ 5dbf9f96-e9a4-11ea-19d7-e15e7f2327c9
+tcount(zxd)
+
+# ╔═╡ db9a0d4e-e99e-11ea-22ab-1fead216dd07
+zxg = ZXGraph(zxd)
+
+# ╔═╡ a6b92942-e99a-11ea-227d-f9fe53f8a1cf
+# simplify!(Rule{:lc}(), zxd)  #  this should not pass! use `DRule` and `GRule` to distinguish them?
+simplify!(Rule{:lc}(), zxg)  # allow Rule(:lc) for simplicity.
+
+# ╔═╡ b739540e-e99a-11ea-2a04-abd99889cf92
+simplify!(Rule{:p1}(), zxg)  # does not have any effect?
+
+# ╔═╡ c6f809e8-e9b4-11ea-2dcb-57c4a1d65bb7
+zxg |> srule!(:lc) |> srule!(:p1) |> srule_once!(:pab)
+
+# ╔═╡ bd2b3364-e99a-11ea-06e7-4560cb873d2c
+replace!(Rule{:pab}(), zxg)  # this naming is not explict, what about `simplify_recursive!` and `simplily!`.
 
 # ╔═╡ b6eaa762-e9b5-11ea-145e-7b5fa6b01872
 zxd2 = load_graph()
@@ -352,9 +359,6 @@ zxwd_o = convert_to_zxwd(bir_o)
 # ╔═╡ 4b54309c-c3e8-402c-a74f-acbdfc3ef046
 zxwd_t = convert_to_zxwd(bir_t)
 
-# ╔═╡ 553b216e-2180-475f-928c-eda378b6acae
-
-
 # ╔═╡ 1b373f50-92bf-4552-b829-1d9959a9885b
 m_o = Matrix(zxwd_o)
 
@@ -363,6 +367,71 @@ m_t = Matrix(zxwd_t)
 
 # ╔═╡ 7cf94474-213d-4c8e-96f1-1781023718fb
 m_o ≈ m_t
+
+# ╔═╡ 4dcee81a-04fd-4eab-b9b6-3858c3cf3108
+md"""
+# Equivchecking
+"""
+
+# ╔═╡ aa77acb4-4688-46f0-8cca-00c53a47f0fe
+d = ZXDiagram(2)
+
+# ╔═╡ 32f1d8a4-13b8-4f7b-a37e-43f1483faf03
+begin
+	push_gate!(d, Val{:SWAP}(), [1, 2])
+end
+
+# ╔═╡ 383c4ba8-7824-4e79-a83d-a19c5b22fbac
+
+
+# ╔═╡ 81d91cc6-2d53-4e6b-ab50-364337069b85
+bare = full_reduction(d)
+
+# ╔═╡ d738ddb0-f7eb-4376-81ef-9f6ca512eccb
+
+
+# ╔═╡ 639b2f94-f957-4fbd-a571-709600da1df6
+typeof(d.st)
+
+# ╔═╡ d600840b-cc0e-42d9-946c-ce9b58678f38
+function is_in_or_out_spider(st::SpiderType.SType)
+	st == SpiderType.In || st == SpiderType.Out
+end
+
+# ╔═╡ 9ac5063f-3a42-4316-a097-f3c964e83ed4
+function contains_only_bare_wires(zxd::Union{ZXDiagram, ZXGraph, ZXDiagram})
+# check if each element is of type SpiderType.Out or SpiderType.In
+all(is_in_or_out_spider(st[2]) for st in zxd.st )
+end
+
+# ╔═╡ 5f52409c-7408-45dc-9fc1-053d820537a2
+contains_only_bare_wires(bare)
+
+# ╔═╡ 6e4587b0-35c4-4798-83be-26e94789f50e
+contains_only_bare_wires(d)
+
+# ╔═╡ aea95133-80f1-4d2b-a323-328beb5403d0
+reduced_o = full_reduction(zxd_o)
+
+# ╔═╡ 50a2bd10-7489-4ee0-b156-5982a08a5e42
+contains_only_bare_wires(reduced_o)
+
+# ╔═╡ 5c6ba99a-9c24-4677-a5ce-042288a707e4
+reduced_t = full_reduction(zxd_t)
+
+# ╔═╡ 33207623-d491-492d-9f51-a87079dc9d0d
+contains_only_bare_wires(reduced_t)
+
+# ╔═╡ 44d1b8e3-a30c-408b-b766-819a75a354bc
+[p == 0 // 2 * π for p in reduced_t.ps]
+
+# ╔═╡ ac7e74d4-bb38-4819-9b1a-e0c78be0996b
+spider_sequence(reduced_o)
+
+# ╔═╡ dfbf87be-6e16-4fe2-9b0c-f06c7b228715
+function append_adjoint_diagram(zxd1, zxd_1)
+
+end
 
 # ╔═╡ Cell order:
 # ╠═8ab9b70a-e98d-11ea-239c-73dc659722c2
@@ -377,6 +446,7 @@ m_o ≈ m_t
 # ╠═a9bf8e31-686a-4057-acec-bd04e8b5a3dc
 # ╠═b9d32b41-8bff-4faa-b198-db096582fb2e
 # ╟─90b83d5e-e99a-11ea-1fb2-95c907668262
+# ╠═9b69f77f-21b9-4c13-94db-a6e7c2bd21dd
 # ╠═5dbf9f96-e9a4-11ea-19d7-e15e7f2327c9
 # ╠═db9a0d4e-e99e-11ea-22ab-1fead216dd07
 # ╟─66eb6e1a-e99f-11ea-141c-a9017390524f
@@ -421,7 +491,25 @@ m_o ≈ m_t
 # ╠═960e80b3-efaf-4c49-b2c6-4849dd0a0ef4
 # ╠═77afd45a-47e1-4cab-a731-3298351b693d
 # ╠═4b54309c-c3e8-402c-a74f-acbdfc3ef046
-# ╠═553b216e-2180-475f-928c-eda378b6acae
 # ╠═1b373f50-92bf-4552-b829-1d9959a9885b
 # ╠═92965f5c-14b4-4e28-aff0-54aa476e948d
 # ╠═7cf94474-213d-4c8e-96f1-1781023718fb
+# ╠═4dcee81a-04fd-4eab-b9b6-3858c3cf3108
+# ╠═aa77acb4-4688-46f0-8cca-00c53a47f0fe
+# ╠═32f1d8a4-13b8-4f7b-a37e-43f1483faf03
+# ╠═383c4ba8-7824-4e79-a83d-a19c5b22fbac
+# ╠═81d91cc6-2d53-4e6b-ab50-364337069b85
+# ╠═1b2635ed-a985-42a3-842a-4aec30df9186
+# ╠═9ac5063f-3a42-4316-a097-f3c964e83ed4
+# ╠═d738ddb0-f7eb-4376-81ef-9f6ca512eccb
+# ╠═639b2f94-f957-4fbd-a571-709600da1df6
+# ╠═d600840b-cc0e-42d9-946c-ce9b58678f38
+# ╠═5f52409c-7408-45dc-9fc1-053d820537a2
+# ╠═6e4587b0-35c4-4798-83be-26e94789f50e
+# ╠═aea95133-80f1-4d2b-a323-328beb5403d0
+# ╠═50a2bd10-7489-4ee0-b156-5982a08a5e42
+# ╠═5c6ba99a-9c24-4677-a5ce-042288a707e4
+# ╠═33207623-d491-492d-9f51-a87079dc9d0d
+# ╠═44d1b8e3-a30c-408b-b766-819a75a354bc
+# ╠═ac7e74d4-bb38-4819-9b1a-e0c78be0996b
+# ╠═dfbf87be-6e16-4fe2-9b0c-f06c7b228715

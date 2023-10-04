@@ -39,3 +39,6 @@ push_gate!(zxd::AbstractZXDiagram, args...) = throw(MethodError(ZXCalculus.push_
 pushfirst_gate!(zxd::AbstractZXDiagram, args...) = throw(MethodError(ZXCalculus.pushfirst_gate!, (zxd, args...)))
 add_spider!(zxd::AbstractZXDiagram, args...) = throw(MethodError(ZXCalculus.add_spider!, (zxd, args...)))
 insert_spider!(zxd::AbstractZXDiagram, args...) = throw(MethodError(ZXCalculus.insert_spider!, (zxd, args...)))
+
+
+contains_only_bare_wires(zxd::AbstractZXDiagram) = all(is_in_or_out_spider(st[2]) for st in zxd.st )
