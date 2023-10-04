@@ -37,11 +37,14 @@ export rewrite!,
   circuit_extraction,
   phase_teleportation
 export phase, spiders, rem_spider!
+export contains_only_bare_wires, generate_layout!, spider_sequence
 export plot
 export BlockIR
 
 # FIXME Remove due to  WARNING: import of ZXW.ZXWDiagram into ZXCalculus conflicts with an existing identifier; ignored.
 export convert_to_zxwd
+export get_inputs
+export get_outputs
 
 include("scalar.jl")
 

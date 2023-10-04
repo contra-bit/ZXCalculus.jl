@@ -173,6 +173,7 @@ nqubits(zxd::ZXDiagram) = zxd.layout.nbits
 
 function print_spider(io::IO, zxd::ZXDiagram{T, P}, v::T) where {T<:Integer, P}
     st_v = spider_type(zxd, v)
+
     if st_v == SpiderType.Z
         printstyled(io, "S_$(v){phase = $(zxd.ps[v])"*(zxd.ps[v] isa Phase ? "}" : "⋅π}"); color = :green)
     elseif st_v == SpiderType.X

@@ -13,14 +13,12 @@ end
 
 to_matrix(zxg::ZXGraph; kwargs...) = to_matrix(ZXDiagram(zxg); kwargs...)
 function to_matrix(zxd::ZXDiagram; optimizer = GreedyMethod(), verbose = false)
-    nin = sum([(spider_type(zxd, v) in (SpiderType.In, SpiderType.Out)) for v in get_inputs(zxd)])
-    nout = sum([(spider_type(zxd, v) in (SpiderType.In, SpiderType.Out)) for v in get_outputs(zxd)])
     ec, ts = to_eincode(zxd)
     verbose && println("Optimizing contraction orders...")
     ec_opt = optimize_code(ec, uniformsize(ec, 2), optimizer);
     verbose && println("Contracting...")
     m = ec_opt(ts...)
-    return reshape(m, (1<<nout, 1<<nin))
+    return reshape(m, (1<<nin(zxd), 1<<nout(zxd)))
 end
 
 function to_eincode(zxwd::ZXWDiagram{T,P}) where {T,P}
