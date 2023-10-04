@@ -751,3 +751,10 @@ function append_adjoint_diagram!(zxd_1, zxd_2)
   end
   zxd_new
 end
+
+function equivalence(zxd_1, zxd_2)
+    m1 = full_reduction(zxd_o)
+	m2 = full_reduction(zxd_t)
+	m_dagger = ZXCalculus.append_adjoint_diagram(m1, m2)
+	contains_only_bare_wires(m_dagger)
+end
