@@ -16,6 +16,7 @@ begin
 	Pkg.add(url="https://github.com/QuantumBFS/Multigraphs.jl")
 	#Pkg.add(url="https://github.com/contra-bit/ZXCalculus.jl", rev="feature/plots")
 	Pkg.add(url="/home/liam/src/quantum-circuits/software/ZXCalculus.jl", rev="feat/convert_to_zxwd")
+	Pkg; Pkg.add("BenchmarkTime")
 	
 end
 
@@ -41,6 +42,9 @@ using ZXCalculus: BlockIR
 
 # ╔═╡ 1b2635ed-a985-42a3-842a-4aec30df9186
 using MLStyle
+
+# ╔═╡ 6714075e-3f7f-4970-b2c9-22d19a5383eb
+using BenchmarkTools
 
 # ╔═╡ 0b9a6c7a-0783-4a65-bd1d-e4d89b1b8c55
 function Base.show(io::IO, mime::MIME"text/html", zx::Union{ZXDiagram, ZXGraph})
@@ -340,11 +344,11 @@ begin
 	  bir_o = BlockIR(ast_o)
 	  ast_t = OpenQASM.parse(qasm_t)
 	  bir_t = BlockIR(ast_t)
-	
+      zxd_o = ZXDiagram(bir_o)
 end
 
 # ╔═╡ a470d83b-c538-4a51-96c5-b957460d6023
-    zxd_o = ZXDiagram(bir_o)
+
 
 # ╔═╡ 960e80b3-efaf-4c49-b2c6-4849dd0a0ef4
 begin
@@ -477,13 +481,35 @@ concat = append_adjoint_diagram!(zxd_t, zxd_o)
 concat_full_reduction = full_reduction(concat)
 
 # ╔═╡ b5198e92-9ded-4963-8a93-045102c52943
-replace!(Rule{:i1}(), ZXDiagram(concat_full_reduction))
+rs = replace!(Rule{:id}(), concat_full_reduction)
 
 # ╔═╡ 4e1fc8ce-87d6-4a11-8d95-e85663ef718b
-show(concat_full_reduction)
+show(rs)
 
 # ╔═╡ 94c66dbc-c3e4-4088-be76-fce0b46d876b
 contains_only_bare_wires(concat_full_reduction)
+
+# ╔═╡ 63c83987-e5b4-4372-8d98-e17d9928b578
+begin
+	zxd_bench_e3 = ZXDiagram(10^3); push_gate!(zxd_bench_e3, Val{:SWAP}(), [1,10^2*3])
+	@time m_swap_e3 = full_reduction(zxd_bench_e3); contains_only_bare_wires(m_swap_e3)
+end
+
+# ╔═╡ 17f2285b-7f22-4c9a-8c9b-3a98a666e708
+begin
+	zxd_bench_e4 = ZXDiagram(10^4); push_gate!(zxd_bench_e4, Val{:SWAP}(), [1,10^3])
+	@time m_swap_e4 = full_reduction(zxd_bench_e4); @time contains_only_bare_wires(m_swap_e4)
+end
+
+
+# ╔═╡ 77438e70-9d3c-4151-8d4a-b88a4434f1c4
+begin
+	@time zxd_bench_e5 = ZXDiagram(10^5)
+	@time push_gate!(zxd_bench_e5, Val{:SWAP}(), [1, 10^2*5])
+ 	@time m_swape_e5 = full_reduction(zxd_bench_e5)
+	@time contains_only_bare_wires(m_swape_e5)
+end
+
 
 # ╔═╡ Cell order:
 # ╠═8ab9b70a-e98d-11ea-239c-73dc659722c2
@@ -580,3 +606,7 @@ contains_only_bare_wires(concat_full_reduction)
 # ╠═b5198e92-9ded-4963-8a93-045102c52943
 # ╠═4e1fc8ce-87d6-4a11-8d95-e85663ef718b
 # ╠═94c66dbc-c3e4-4088-be76-fce0b46d876b
+# ╠═6714075e-3f7f-4970-b2c9-22d19a5383eb
+# ╠═63c83987-e5b4-4372-8d98-e17d9928b578
+# ╠═17f2285b-7f22-4c9a-8c9b-3a98a666e708
+# ╠═77438e70-9d3c-4151-8d4a-b88a4434f1c4
