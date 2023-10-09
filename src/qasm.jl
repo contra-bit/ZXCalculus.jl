@@ -17,7 +17,7 @@ ctrl_address(i::ASTNode) = Locations(parse(Int, i.ctrl.address.str) + 1)
 push_prog!(circ::Chain, prog::Any) = prog !== nothing && push!(circ.args, prog)
 
 function convert_to_blockir(ast::MainProgram)
-  qubits = qubits = sum([parse(Int, m.size.str) for m in ast.prog if m isa RegDecl && m.type.str == "qreg"])
+  qubits = sum([parse(Int, m.size.str) for m in ast.prog if m isa RegDecl && m.type.str == "qreg"])
   ir = @make_ircode begin end
   chain = Chain()
   [push_prog!(chain, prog_to_gate(prog)) for prog in ast.prog]
@@ -26,7 +26,6 @@ end
 
 
 function instruction_to_gate(i::Instruction)
-  dump(i)
   @switch i.name begin
     @case "z"
     Gate(Z, qarg_address(i))

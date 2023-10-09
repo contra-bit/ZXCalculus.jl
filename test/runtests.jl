@@ -9,6 +9,8 @@ end
 
 @testset "ZW Diagram Utilities" begin
     include("zw_utils.jl")
+end
+
 @testset "equivalence" begin
   include("equivalence.jl")
 end
