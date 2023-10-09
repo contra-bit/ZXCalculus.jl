@@ -104,15 +104,17 @@ end
   measure q[1] -> c[1];
   """)
 
+    zxd = ZXDiagram(bv)
 
   @testset "correct parsing" begin
    @test bv !== nothing
   end
 
   @testset "convert into ZXDiagram" begin
-    zxd = ZXDiagram(bv)
     @test zxd !== nothing
   end
 
-
+  @testset "equivalence check" begin
+    @test true == equivalence(zxd, zxd)
+  end
 end
