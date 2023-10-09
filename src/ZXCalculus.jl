@@ -87,24 +87,6 @@ end # module ZXW
 using .ZXW: ZXWDiagram, CalcRule
 
 export ZXWDiagram, CalcRule
-using .ZXW:
-  ZXWDiagram,
-  ZXWSpiderType,
-  Parameter,
-  CalcRule,
-  PiUnit,
-  Factor,
-  Input,
-  Output,
-  W,
-  H,
-  D,
-  Z,
-  X,
-  rewrite!
-export ZXWSpiderType,
-  ZXWDiagram, Parameter, PiUnit, Factor, Input, Output, W, H, D, Z, X, CalcRule
-export substitute_variables!, expval_circ!, stack_zxwd!, concat!
 
 include("parameter.jl")
 
