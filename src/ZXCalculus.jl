@@ -37,7 +37,7 @@ export rewrite!,
   circuit_extraction,
   phase_teleportation
 export phase, spiders, rem_spider!
-export contains_only_bare_wires, spider_sequence, invert_phases!, append_adjoint_diagram!
+export contains_only_bare_wires, spider_sequence, invert_phases!, append_adjoint_diagram!, equivalence
 export plot
 export BlockIR
 
@@ -61,6 +61,7 @@ include("circuit_extraction.jl")
 include("phase_teleportation.jl")
 
 include("ir.jl")
+include("equivalence.jl")
 
 include("deprecations.jl")
 

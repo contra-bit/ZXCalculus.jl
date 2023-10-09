@@ -16,7 +16,8 @@ begin
 	Pkg.add(url="https://github.com/QuantumBFS/Multigraphs.jl")
 	#Pkg.add(url="https://github.com/contra-bit/ZXCalculus.jl", rev="feature/plots")
 	Pkg.add(url="/home/liam/src/quantum-circuits/software/ZXCalculus.jl", rev="feat/convert_to_zxwd")
-	Pkg; Pkg.add("BenchmarkTime")
+	Pkg.add(url="/home/liam/src/quantum-circuits/software/QuantumCircuitEquivalence.jl", rev="feat/zx")
+	Pkg; Pkg.add("BenchmarkTools")
 	
 end
 
@@ -45,6 +46,9 @@ using MLStyle
 
 # ╔═╡ 6714075e-3f7f-4970-b2c9-22d19a5383eb
 using BenchmarkTools
+
+# ╔═╡ b843d686-f7cf-41ab-bb16-008473fa48f4
+using QuantumCircuitEquivalence
 
 # ╔═╡ 0b9a6c7a-0783-4a65-bd1d-e4d89b1b8c55
 function Base.show(io::IO, mime::MIME"text/html", zx::Union{ZXDiagram, ZXGraph})
@@ -472,22 +476,16 @@ qubit_loc(zxd::ZXDiagram{T, P}, v::T) where {T, P} = qubit_loc(zxd.layout, v)
 zxd_1
 
 # ╔═╡ 90bef68b-7fe8-4a37-9592-483d22dcae8a
-concat = append_adjoint_diagram!(zxd_t, zxd_o)
+merged_diagram = append_adjoint_diagram!(zxd_t, zxd_o)
 
 # ╔═╡ 5bee8d6f-17c5-420c-bcac-2c853bef8166
 
 
 # ╔═╡ 41c4aa8c-12ab-4086-b7fe-3372f06c973a
-concat_full_reduction = full_reduction(concat)
+@time m_simple = full_reduction(merged_diagram)
 
-# ╔═╡ b5198e92-9ded-4963-8a93-045102c52943
-rs = replace!(Rule{:id}(), concat_full_reduction)
-
-# ╔═╡ 4e1fc8ce-87d6-4a11-8d95-e85663ef718b
-show(rs)
-
-# ╔═╡ 94c66dbc-c3e4-4088-be76-fce0b46d876b
-contains_only_bare_wires(concat_full_reduction)
+# ╔═╡ b74e4bde-2492-49ec-b341-424c6b7b2f86
+contains_only_bare_wires(m_simple)
 
 # ╔═╡ 63c83987-e5b4-4372-8d98-e17d9928b578
 begin
@@ -503,6 +501,8 @@ end
 
 
 # ╔═╡ 77438e70-9d3c-4151-8d4a-b88a4434f1c4
+# ╠═╡ disabled = true
+#=╠═╡
 begin
 	@time zxd_bench_e5 = ZXDiagram(10^5)
 	@time push_gate!(zxd_bench_e5, Val{:SWAP}(), [1, 10^2*5])
@@ -510,6 +510,66 @@ begin
 	@time contains_only_bare_wires(m_swape_e5)
 end
 
+  ╠═╡ =#
+
+# ╔═╡ 742d627f-0b83-479c-9325-f1c6317629e5
+md"""
+# Manaual Equivalence Checking Benchmark
+"""
+
+# ╔═╡ c9e8dbbe-6be3-4a91-b2ac-7cba51579629
+begin
+	bv_001_dyn = OpenQASM.parse("""
+	OPENQASM 2.0;
+	include "qelib1.inc";
+	qreg q[2];
+	creg c[3];
+	x q[1];
+	barrier q[0],q[1];
+	h q[0];
+	h q[1];
+	cx q[0],q[1];
+	h q[0];
+	barrier q[0],q[1];
+	measure q[0] -> c[0];
+	reset q[0];
+	barrier q[0],q[1];
+	h q[0];
+	h q[0];
+	barrier q[0],q[1];
+	measure q[0] -> c[1];
+	reset q[0];
+	barrier q[0],q[1];
+	h q[0];
+	h q[0];
+	barrier q[0],q[1];
+	measure q[0] -> c[2];""")
+	
+	bv_001_static = OpenQASM.parse("""
+	OPENQASM 2.0;
+	include "qelib1.inc";
+	qreg q[4];
+	creg c[3];
+	x q[3];
+	barrier q[0],q[1],q[2],q[3];
+	h q[0];
+	h q[1];
+	h q[2];
+	h q[3];
+	barrier q[0],q[1],q[2],q[3];
+	cx q[0],q[3];
+	barrier q[0],q[1],q[2],q[3];
+	h q[0];
+	h q[1];
+	h q[2];
+	measure q[0] -> c[0];
+	measure q[1] -> c[1];
+	measure q[2] -> c[2];
+	""")
+end
+
+# ╔═╡ 52ce1e9a-d996-4345-9516-8dbc6e20c4a6
+unitary_reconstruction(bv_001_dyn)
 
 # ╔═╡ Cell order:
 # ╠═8ab9b70a-e98d-11ea-239c-73dc659722c2
@@ -603,10 +663,12 @@ end
 # ╠═90bef68b-7fe8-4a37-9592-483d22dcae8a
 # ╟─5bee8d6f-17c5-420c-bcac-2c853bef8166
 # ╠═41c4aa8c-12ab-4086-b7fe-3372f06c973a
-# ╠═b5198e92-9ded-4963-8a93-045102c52943
-# ╠═4e1fc8ce-87d6-4a11-8d95-e85663ef718b
-# ╠═94c66dbc-c3e4-4088-be76-fce0b46d876b
+# ╠═b74e4bde-2492-49ec-b341-424c6b7b2f86
 # ╠═6714075e-3f7f-4970-b2c9-22d19a5383eb
 # ╠═63c83987-e5b4-4372-8d98-e17d9928b578
 # ╠═17f2285b-7f22-4c9a-8c9b-3a98a666e708
 # ╠═77438e70-9d3c-4151-8d4a-b88a4434f1c4
+# ╠═742d627f-0b83-479c-9325-f1c6317629e5
+# ╠═b843d686-f7cf-41ab-bb16-008473fa48f4
+# ╠═c9e8dbbe-6be3-4a91-b2ac-7cba51579629
+# ╠═52ce1e9a-d996-4345-9516-8dbc6e20c4a6
