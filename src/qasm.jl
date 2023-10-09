@@ -35,12 +35,12 @@ function instruction_to_gate(i::Instruction)
     Gate(H, qarg_address(i))
     @case "s"
     Gate(S, qarg_address(i))
-  #  @case "sdag"
-  #  Gate(S, qarg_address(i))
+    @case "sdg"
+    Gate(AdjointOperation(S), qarg_address(i))
     @case "t"
     Gate(S, qarg_address(i))
-  #  @case "tdag"
-  #  Gate(S, qarg_address(i))
+    @case "tdg"
+    Gate(AdjointOperation(T), qarg_address(i))
     @case "rx"
     error("Gate $i not yet implemented")
     @case "rx"
