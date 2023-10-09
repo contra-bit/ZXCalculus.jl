@@ -26,6 +26,7 @@ end
 
 
 function instruction_to_gate(i::Instruction)
+  dump(i)
   @switch i.name begin
     @case "z"
     Gate(Z, qarg_address(i))
