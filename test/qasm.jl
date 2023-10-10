@@ -144,6 +144,7 @@ end
 
     zxd = ZXDiagram(bv)
     zxd_re = ZXDiagram(bv_re)
+    eq_res = equivalence(zxd, zxd_re)
 
   @testset "correct parsing" begin
    @test bv !== nothing
@@ -154,6 +155,6 @@ end
   end
 
   @testset "equivalence check" begin
-  @test true == equivalence(zxd, zxd_re)
+  @test true == eq_res
   end
 end
