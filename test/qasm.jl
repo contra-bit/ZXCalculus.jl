@@ -104,7 +104,46 @@ end
   measure q[1] -> c[1];
   """)
 
+ 
+  bv_re = BlockIR("""
+  OPENQASM 2.0;
+  include "qelib1.inc";
+  qreg q[3];
+  creg c1[1];
+  creg c2[1];
+  h q[1];
+  t q[1];
+  x q[2];
+  h q[2];
+  x q[2];
+  h q[2];
+  t q[2];
+  CX q[1], q[2];
+  tdg q[2];
+  CX q[1], q[2];
+  h q[1];
+  h q[2];
+  h q[2];
+  t q[2];
+  h q[0];
+  t q[0];
+  CX q[0], q[2];
+  tdg q[2];
+  CX q[0], q[2];
+  CX q[1], q[0];
+  tdg q[0];
+  tdg q[2];
+  CX q[0], q[2];
+  t q[2];
+  CX q[0], q[2];
+  CX q[1], q[0];
+  h q[0];
+  h q[2];
+  measure q[0] -> c2[0];
+  measure q[1] -> c1[0];""")
+
     zxd = ZXDiagram(bv)
+    zxd_re = ZXDiagram(bv_re)
 
   @testset "correct parsing" begin
    @test bv !== nothing
@@ -115,6 +154,6 @@ end
   end
 
   @testset "equivalence check" begin
-    @test true == equivalence(zxd, zxd)
+  @test true == equivalence(zxd, zxd_re)
   end
 end

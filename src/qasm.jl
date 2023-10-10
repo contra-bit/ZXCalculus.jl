@@ -47,6 +47,8 @@ function instruction_to_gate(i::Instruction)
     error("Gate $i not yet implemented")
     @case "shift"
     error("Gate $i not yet implemented")
+    @case "id"
+    nothing
     @case _
     error("Gate $i not supported")
   end
@@ -65,7 +67,7 @@ function prog_to_gate(a::Any)
         Locations(qarg_address(cz))),
       CtrlLocations(ctrl_address(cz)))
     m::Measure => nothing
-    r::Reset => error("Only unitaries are supported, please use the convert function")
+    r::Reset => error("only unitaries are supported, please use the function reconstruct_unitaries from the package QuantumCircuitEquivalence.jl")
   end
 end
 

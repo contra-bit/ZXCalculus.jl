@@ -642,9 +642,7 @@ checks the equivalence of two different ZXDiagrams
 """
 function equivalence(zxd_1::ZXDiagram, zxd_2::ZXDiagram)
   merged_diagram = append_adjoint_diagram!(zxd_1, zxd_2)
-  show(merged_diagram)
   m_simple = full_reduction(merged_diagram)
-  show(m_simple)
   contains_only_bare_wires(m_simple)
 end
 
