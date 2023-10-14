@@ -60,8 +60,8 @@ function prog_to_gate(a::Any)
     r::RegDecl => nothing
     inst::Instruction => instruction_to_gate(inst)
     cx::CXGate => Ctrl(Gate(X,
-        Locations(ctrl_address(cx))),
-      CtrlLocations(qarg_address(cx)))
+        Locations(qarg_address(cx))),
+      CtrlLocations(ctrl_address(cx)))
 
     cz::CZGate => Ctrl(Gate(Z,
         Locations(qarg_address(cz))),
