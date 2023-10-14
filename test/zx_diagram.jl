@@ -56,3 +56,9 @@ pushfirst_gate!(zxd4, Val(:CNOT), 2, 1)
 pushfirst_gate!(zxd4, Val(:CZ), 1, 2)
 @test plot(zxd4) !== nothing
 @test indegree(zxd4, 5) == outdegree(zxd4, 5) == degree(zxd4, 5)
+
+
+@testset "dagger ZXDiagram" begin
+  zxd4_inv = dagger(zxd)
+  @test zxd4 = dagger(zxd4_inv)
+end

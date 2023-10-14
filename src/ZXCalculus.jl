@@ -37,7 +37,7 @@ export rewrite!,
   circuit_extraction,
   phase_teleportation
 export phase, spiders, rem_spider!
-export contains_only_bare_wires, spider_sequence, invert_phases!, append_adjoint_diagram!, equivalence
+export contains_only_bare_wires, spider_sequence, dagger, concat!, verify_equality
 export plot
 export BlockIR
 
@@ -99,28 +99,28 @@ using ..ZXCalculus
 using ..ZXCalculus.ZXW: _round_phase, Parameter
 # these will be changed to using PlanarMultigraph: vertices after we split out package
 using ..ZXCalculus:
-    vertices,
-    nv,
-    has_vertex,
-    ne,
-    neighbors,
-    rem_edge!,
-    add_edge!,
-    degree,
-    next,
-    split_vertex!,
-    split_edge!,
-    face,
-    trace_face,
-    make_hole!,
-    add_vertex_and_facet_to_boarder!,
-    split_facet!,
-    twin,
-    prev,
-    add_multiedge!,
-    join_facet!,
-    trace_vertex,
-    join_vertex!
+  vertices,
+  nv,
+  has_vertex,
+  ne,
+  neighbors,
+  rem_edge!,
+  add_edge!,
+  degree,
+  next,
+  split_vertex!,
+  split_edge!,
+  face,
+  trace_face,
+  make_hole!,
+  add_vertex_and_facet_to_boarder!,
+  split_facet!,
+  twin,
+  prev,
+  add_multiedge!,
+  join_facet!,
+  trace_vertex,
+  join_vertex!
 
 
 
