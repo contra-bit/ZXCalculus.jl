@@ -674,7 +674,6 @@ function import_non_in_out!(
   d2::ZXDiagram{T,P},
   v2tov1::Dict{T,T},
 ) where {T,P}
-  @info "non in out $v2tov1"
   for v2 in vertices(d2.mg)
     st = spider_type(d2, v2)
     if st == SpiderType.In || st == SpiderType.Out
@@ -686,7 +685,6 @@ function import_non_in_out!(
       throw(ArgumentError("Unknown spider type $(d2.st[v2])"))
     end
     if !isnothing(new_v)
-      @info "adding new_v $new_v"
       v2tov1[v2] = new_v
       d1.st[new_v] = spider_type(d2, v2)
       d1.ps[new_v] = d2.ps[v2]
@@ -725,14 +723,12 @@ function get_output_idx(zxd::ZXDiagram{T,P}, q::T) where {T,P}
   for v in get_outputs(zxd)
     if spider_type(zxd, v) == SpiderType.Out && Int(qubit_loc(zxd, v)) == q
       res = v
-      @info "output index of $q is $res "
     else
       res = nothing
     end
 
     !isnothing(res) && return res
   end
-  @info "output index of $q is nothing "
   return -1
 end
 
@@ -745,9 +741,7 @@ function import_edges!(
   d2::ZXDiagram{T,P},
   v2tov1::Dict{T,T},
 ) where {T,P}
-  @info "importing edges with $v2tov1"
   for edge in edges(d2.mg)
-    @info edge
     src, dst, emul = edge.src, edge.dst, edge.mul
     add_edge!(d1.mg, v2tov1[src], v2tov1[dst], emul)
   end
@@ -764,7 +758,6 @@ function concat!(zxd_1::ZXDiagram{T,P}, zxd_2::ZXDiagram{T,P})::ZXDiagram{T,P} w
 
   v2tov1 = Dict{T,T}()
   import_non_in_out!(zxd_1, zxd_2, v2tov1)
-  @info v2tov1
 
   for i = 1:nout(zxd_1)
     out_idx = get_output_idx(zxd_1, i)
@@ -776,11 +769,9 @@ function concat!(zxd_1::ZXDiagram{T,P}, zxd_2::ZXDiagram{T,P})::ZXDiagram{T,P} w
   end
 
   for i = 1:nout(zxd_2)
-    @info "$i $(get_output_idx(zxd_2, i))"
     v2tov1[get_output_idx(zxd_2, i)] = get_output_idx(zxd_1, i)
   end
 
-  @info v2tov1
   import_edges!(zxd_1, zxd_2, v2tov1)
   add_global_phase!(zxd_1, zxd_2.scalar.phase)
   add_power!(zxd_1, zxd_2.scalar.power_of_sqrt_2)
