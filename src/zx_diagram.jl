@@ -674,6 +674,7 @@ function import_non_in_out!(
   d2::ZXDiagram{T,P},
   v2tov1::Dict{T,T},
 ) where {T,P}
+  @info "non in out $v2tov1"
   for v2 in vertices(d2.mg)
     st = spider_type(d2, v2)
     if st == SpiderType.In || st == SpiderType.Out
@@ -685,8 +686,11 @@ function import_non_in_out!(
       throw(ArgumentError("Unknown spider type $(d2.st[v2])"))
     end
     if !isnothing(new_v)
+      @info "adding new_v $new_v"
       v2tov1[v2] = new_v
       d1.st[new_v] = spider_type(d2, v2)
+      d1.ps[new_v] = d2.ps[v2]
+      d1.phase_ids[new_v] = (v2, 1)
     end
   end
 end
@@ -741,7 +745,7 @@ function import_edges!(
   d2::ZXDiagram{T,P},
   v2tov1::Dict{T,T},
 ) where {T,P}
-  @info v2tov1
+  @info "importing edges with $v2tov1"
   for edge in edges(d2.mg)
     @info edge
     src, dst, emul = edge.src, edge.dst, edge.mul
@@ -756,7 +760,7 @@ end
 Appends two diagrams, where the second diagram is inverted
 """
 function concat!(zxd_1::ZXDiagram{T,P}, zxd_2::ZXDiagram{T,P})::ZXDiagram{T,P} where {T,P}
-  nqubits(zxd_1) == nqubits(zxd_2) || throw(ArgumentError("number of qubits need to be equal, go $q and $(nqubits(zxd_2))"))
+  nqubits(zxd_1) == nqubits(zxd_2) || throw(ArgumentError("number of qubits need to be equal, go  $(nqubits(zxd_1)) and $(nqubits(zxd_2))"))
 
   v2tov1 = Dict{T,T}()
   import_non_in_out!(zxd_1, zxd_2, v2tov1)

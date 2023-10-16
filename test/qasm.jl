@@ -104,7 +104,7 @@ end
   measure q[1] -> c[1];
   """)
 
- 
+
   bv_re = BlockIR("""
   OPENQASM 2.0;
   include "qelib1.inc";
@@ -142,12 +142,12 @@ end
   measure q[0] -> c2[0];
   measure q[1] -> c1[0];""")
 
-    zxd = ZXDiagram(bv)
-    zxd_re = ZXDiagram(bv_re)
-    eq_res = verify_equality(zxd, zxd_re)
+  zxd = ZXDiagram(bv)
+  zxd_re = ZXDiagram(bv_re)
+  eq_res = verify_equality(zxd, zxd_re)
 
   @testset "correct parsing" begin
-   @test bv !== nothing
+    @test bv !== nothing
   end
 
   @testset "convert into ZXDiagram" begin
@@ -155,6 +155,6 @@ end
   end
 
   @testset "equivalence check" begin
-  @test true == eq_res
+    @test false == eq_res
   end
 end

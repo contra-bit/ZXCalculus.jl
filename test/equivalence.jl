@@ -8,6 +8,5 @@ pushfirst_gate!(zxd1, Val(:CZ), 1, 2)
 zxd2 = copy(zxd1)
 pushfirst_gate!(zxd1, Val(:X), 1)
 
-#@test equivalence(zxd1, zxd2) == false
-res = verify_equality(zxd1, zxd1)
-@test res == true
+@test verify_equality(zxd1, zxd2) == false
+@test verify_equality(zxd1, zxd1) == true
