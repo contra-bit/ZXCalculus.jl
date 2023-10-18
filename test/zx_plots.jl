@@ -1,7 +1,6 @@
 using Test
 using ZXCalculus
 using YaoHIR, YaoLocations
-using CompilerPluginTools
 
 c = YaoHIR.Chain()
 push_gate!(c, Val{:Sdag}(), 1)
@@ -31,7 +30,7 @@ push_gate!(c, Val{:H}(), 1)
 push_gate!(c, Val{:S}(), 4)
 push_gate!(c, Val{:X}(), 4)
 
-ir = @make_ircode begin end;
+ir = IRCode();
 bir = BlockIR(ir, 4, c);
 zxd = convert_to_zxd(bir)
 zxg = ZXGraph(zxd)

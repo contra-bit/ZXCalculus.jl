@@ -775,8 +775,6 @@ function concat!(zxd_1::ZXDiagram{T,P}, zxd_2::ZXDiagram{T,P})::ZXDiagram{T,P} w
   import_edges!(zxd_1, zxd_2, v2tov1)
   add_global_phase!(zxd_1, zxd_2.scalar.phase)
   add_power!(zxd_1, zxd_2.scalar.power_of_sqrt_2)
-  return zxd_1
-
 
   return zxd_1
 end
@@ -792,4 +790,17 @@ function stype_to_val(st)
     nothing
     #throw(ArgumentError("$st has no corresponding SpiderType"))
   end
+end
+
+"""
+    verify_equality(zxd_1::ZXDiagram, zxd_2::ZXDiagram)
+
+checks the equivalence of two different ZXDiagrams
+
+"""
+# TODO reimplement dagger and concat! as per ZXW
+function verify_equality(zxd_1::ZXDiagram, zxd_2::ZXDiagram)
+  merged_diagram = concat!(zxd_1, dagger(zxd_2))
+  m_simple = full_reduction(merged_diagram)
+  contains_only_bare_wires(m_simple)
 end

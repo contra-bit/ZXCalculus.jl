@@ -1,5 +1,6 @@
 using ZXCalculus, Graphs, Multigraphs, SparseArrays, ZXCalculus.ZXW, ZXCalculus.ZW
 using YaoHIR: Chain
+using Core.Compiler: IRCode
 using Documenter
 using Test
 
@@ -17,10 +18,6 @@ end
 
 @testset "plotting" begin
   include("zx_plots.jl")
-end
-
-@testset "qasm" begin
-  include("qasm.jl")
 end
 
 @testset "planar multigraphs.jl" begin

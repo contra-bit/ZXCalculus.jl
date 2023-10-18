@@ -61,7 +61,6 @@ include("circuit_extraction.jl")
 include("phase_teleportation.jl")
 
 include("ir.jl")
-include("equivalence.jl")
 
 include("deprecations.jl")
 
@@ -138,6 +137,4 @@ end # module ZW
 
 
 include("plots/zx_plot.jl")
-
-include("qasm.jl")
 end # module

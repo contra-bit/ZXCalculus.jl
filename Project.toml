@@ -4,7 +4,6 @@ authors = ["Chen Zhao and contributors"]
 version = "0.5.0"
 
 [deps]
-CompilerPluginTools = "6b7a57c9-7cc1-4fdf-b7f5-e857abae3638"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Expronicon = "6b7a57c9-7cc1-4fdf-b7f5-e857abae3636"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
