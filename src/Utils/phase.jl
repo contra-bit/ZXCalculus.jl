@@ -4,8 +4,8 @@ The type supports manipulating phases as expressions.
 `Phase(x)` represents the number `x⋅π`.
 """
 struct Phase
-    ex
-    type
+    ex::Any
+    type::Any
 end
 
 Phase(p::T) where {T} = Phase(p, T)
@@ -98,10 +98,10 @@ end
 Base.convert(::Type{Phase}, p) = Phase(p)
 Base.convert(::Type{Phase}, p::Phase) = p
 
-Base.zero(::Phase) = Phase(0//1)
-Base.zero(::Type{Phase}) = Phase(0//1)
-Base.one(::Phase) = Phase(1//1)
-Base.one(::Type{Phase}) = Phase(1//1)
+Base.zero(::Phase) = Phase(0 // 1)
+Base.zero(::Type{Phase}) = Phase(0 // 1)
+Base.one(::Phase) = Phase(1 // 1)
+Base.one(::Type{Phase}) = Phase(1 // 1)
 
 Base.iseven(p::Phase) = (p.ex isa Number) && (-1)^p.ex > 0
 

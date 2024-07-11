@@ -368,8 +368,7 @@ end
 trace_vertex(pmg::PlanarMultigraph{T}, v::T) where {T} =
     trace_orbit(h -> σ_inv(pmg, h), out_half_edge(pmg, v); rev = true)
 
-neighbors(pmg::PlanarMultigraph{T}, v::T) where {T} =
-    [dst(pmg, he) for he in trace_vertex(pmg, v)]
+neighbors(pmg::PlanarMultigraph{T}, v::T) where {T} = [dst(pmg, he) for he in trace_vertex(pmg, v)]
 
 """
     is_boundary(g::PlanarMultigraph{T}, he_id::T) where {T}
@@ -697,11 +696,7 @@ TBW
 - [CGAl](https://doc.cgal.org/latest/Polyhedron/classCGAL_1_1Polyhedron__3.html#a684bc8315f9e97d59e10bf896f0a166c)
 
 """
-function add_vertex_and_facet_to_boarder!(
-    pmg::PlanarMultigraph{T},
-    h::T,
-    g::T,
-) where {T<:Integer}
+function add_vertex_and_facet_to_boarder!(pmg::PlanarMultigraph{T}, h::T, g::T) where {T<:Integer}
     # preconditions
     is_boundary(pmg, h) && is_boundary(pmg, g) || error("Can't add facet on top of facet")
     h != g || error("Can't add a loop as a facet!")
@@ -835,11 +830,7 @@ function set_opposite!(g::PlanarMultigraph{T}, he1::T, he2::T) where {T<:Integer
     return g
 end
 
-function set_next!(
-    g::PlanarMultigraph{T},
-    hss::Vector{T},
-    hds::Vector{T},
-) where {T<:Integer}
+function set_next!(g::PlanarMultigraph{T}, hss::Vector{T}, hds::Vector{T}) where {T<:Integer}
     for (hs, hd) in zip(hss, hds)
         if (hs ∈ keys(g.half_edges) && hd ∈ keys(g.half_edges))
             g.next[hs] = hd
@@ -870,12 +861,7 @@ function set_face!(
     return pmg
 end
 
-function set_face!(
-    pmg::PlanarMultigraph{T},
-    he::T,
-    f::T;
-    both::Bool = false,
-) where {T<:Integer}
+function set_face!(pmg::PlanarMultigraph{T}, he::T, f::T; both::Bool = false) where {T<:Integer}
     return set_face!(pmg, [he], f; both = both)
 end
 

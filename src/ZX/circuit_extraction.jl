@@ -10,7 +10,7 @@ function ancilla_extraction(zxg::ZXGraph)
     ins = copy(get_inputs(nzxg))
     outs = copy(get_outputs(nzxg))
     nbits = length(outs)
-    gads = Dict{Int, Int}()
+    gads = Dict{Int,Int}()
     for v in spiders(nzxg)
         if spider_type(nzxg, v) == SpiderType.Z && degree(nzxg, v) == 1
             v1 = neighbors(nzxg, v)[1]
@@ -27,11 +27,11 @@ function ancilla_extraction(zxg::ZXGraph)
             insert_spider!(nzxg, u, v)
         end
     end
-    
+
     frontiers = copy(outs)
     circ = ZXDiagram(nbits)
     unextracts = Set(spiders(nzxg))
-    qubit_map = Dict{Int, Int}()
+    qubit_map = Dict{Int,Int}()
     for i in eachindex(ins)
         v = ins[i]
         qubit_map[v] = i
@@ -80,13 +80,13 @@ end
 
 function update_frontier_ancilla!(frontiers, nzxg, gads, qubit_map, unextracts, circ)
     nbs = Int[]
-    for i in 1:length(frontiers)
+    for i = 1:length(frontiers)
         v = frontiers[i]
         if phase(nzxg, v) != 0
             pushfirst_gate!(circ, Val(:Z), i, phase(nzxg, v))
             set_phase!(nzxg, v, zero(phase(nzxg, v)))
         end
-        for j in (i+1):length(frontiers)
+        for j = (i+1):length(frontiers)
             u = frontiers[j]
             if has_edge(nzxg, u, v)
                 pushfirst_gate!(circ, Val(:CZ), i, j)
@@ -97,7 +97,7 @@ function update_frontier_ancilla!(frontiers, nzxg, gads, qubit_map, unextracts, 
     for i in eachindex(frontiers)
         v = frontiers[i]
         nb_v = neighbors(nzxg, v)
-        if length(nb_v) == 1 
+        if length(nb_v) == 1
             delete!(unextracts, v)
             @inbounds u = nb_v[1]
             if spider_type(nzxg, u) == SpiderType.Z
@@ -120,8 +120,7 @@ function update_frontier_ancilla!(frontiers, nzxg, gads, qubit_map, unextracts, 
                 qubit_map[u] = i
                 return frontiers
             else
-                spider_type(nzxg, u) == SpiderType.Z && 
-                !(u in nbs) && push!(nbs, u)
+                spider_type(nzxg, u) == SpiderType.Z && !(u in nbs) && push!(nbs, u)
             end
         end
     end
@@ -132,8 +131,8 @@ function update_frontier_ancilla!(frontiers, nzxg, gads, qubit_map, unextracts, 
     M0, steps = gaussian_elimination(M)
     ws = Int[]
     @inbounds for i = 1:length(frontiers)
-        if sum(M0[i,:]) == 1
-            push!(ws, nbs[findfirst(isone, M0[i,:])])
+        if sum(M0[i, :]) == 1
+            push!(ws, nbs[findfirst(isone, M0[i, :])])
         end
     end
     if length(ws) > 0
@@ -176,7 +175,7 @@ end
 
 Extract circuit from a graph-like ZX-diagram.
 """
-function circuit_extraction(zxg::ZXGraph{T, P}) where {T, P}
+function circuit_extraction(zxg::ZXGraph{T,P}) where {T,P}
     nzxg = copy(zxg)
     nbits = nqubits(nzxg)
     gads = Set{T}()
@@ -214,7 +213,7 @@ function circuit_extraction(zxg::ZXGraph{T, P}) where {T, P}
         end
         if phase(nzxg, w) != 0
             pushfirst_gate!(cir, Val{:Rz}(), i, phase(nzxg, w))
-            set_phase!(nzxg, w, zero(P)) 
+            set_phase!(nzxg, w, zero(P))
         end
         @inbounds rem_edge!(nzxg, w, Outs[i])
     end
@@ -252,7 +251,7 @@ function circuit_extraction(zxg::ZXGraph{T, P}) where {T, P}
             push!(frontier, nb[])
         end
     end
-    sort!(frontier, by = (v->qubit_map[v]))
+    sort!(frontier, by = (v -> qubit_map[v]))
     M = biadjacency(nzxg, frontier, Ins)
     M, steps = gaussian_elimination(M)
     for step in steps
@@ -277,9 +276,18 @@ end
 Update frontier. This is an important step in the circuit extraction algorithm.
 For more detail, please check the paper [arXiv:1902.03178](https://arxiv.org/abs/1902.03178).
 """
-function update_frontier!(zxg::ZXGraph{T, P}, gads::Set{T}, frontier::Vector{T}, qubit_map::Dict{T, Int}, cir) where {T, P}
+function update_frontier!(
+    zxg::ZXGraph{T,P},
+    gads::Set{T},
+    frontier::Vector{T},
+    qubit_map::Dict{T,Int},
+    cir,
+) where {T,P}
     # TODO: use inplace methods
-    deleteat!(frontier, [spider_type(zxg, f) != SpiderType.Z || (degree(zxg, f)) == 0 for f in frontier])
+    deleteat!(
+        frontier,
+        [spider_type(zxg, f) != SpiderType.Z || (degree(zxg, f)) == 0 for f in frontier],
+    )
 
     for i = 1:length(frontier)
         v = frontier[i]
@@ -304,7 +312,12 @@ function update_frontier!(zxg::ZXGraph{T, P}, gads::Set{T}, frontier::Vector{T},
             for j = 1:length(frontier)
                 for k = j+1:length(frontier)
                     if is_hadamard(zxg, frontier[j], frontier[k])
-                        pushfirst_gate!(cir, Val(:CZ), qubit_map[frontier[j]], qubit_map[frontier[k]])
+                        pushfirst_gate!(
+                            cir,
+                            Val(:CZ),
+                            qubit_map[frontier[j]],
+                            qubit_map[frontier[k]],
+                        )
                         rem_edge!(zxg, frontier[j], frontier[k])
                     end
                 end
@@ -324,8 +337,8 @@ function update_frontier!(zxg::ZXGraph{T, P}, gads::Set{T}, frontier::Vector{T},
     M0, steps = gaussian_elimination(M)
     ws = T[]
     @inbounds for i = 1:length(frontier)
-        if sum(M0[i,:]) == 1
-            push!(ws, N[findfirst(isone, M0[i,:])])
+        if sum(M0[i, :]) == 1
+            push!(ws, N[findfirst(isone, M0[i, :])])
         end
     end
     # M1 = biadjacency(zxg, frontier, ws)
@@ -351,7 +364,7 @@ function update_frontier!(zxg::ZXGraph{T, P}, gads::Set{T}, frontier::Vector{T},
         end
     end
 
-    for i in 1:length(frontier)
+    for i = 1:length(frontier)
         v = frontier[i]
         if degree(zxg, v) > 1
             continue
@@ -377,8 +390,7 @@ function update_frontier!(zxg::ZXGraph{T, P}, gads::Set{T}, frontier::Vector{T},
     @inbounds for i1 = 1:length(frontier)
         for i2 = i1+1:length(frontier)
             if has_edge(zxg, frontier[i1], frontier[i2])
-                pushfirst_gate!(cir, Val{:CZ}(), qubit_map[frontier[i1]],
-                    qubit_map[frontier[i2]])
+                pushfirst_gate!(cir, Val{:CZ}(), qubit_map[frontier[i1]], qubit_map[frontier[i2]])
                 rem_edge!(zxg, frontier[i1], frontier[i2])
             end
         end
@@ -391,7 +403,7 @@ end
 
 Return the biadjacency matrix of `zxg` from vertices in `F` to vertices in `N`.
 """
-function biadjacency(zxg::ZXGraph{T, P}, F::Vector{T}, N::Vector{T}) where {T, P}
+function biadjacency(zxg::ZXGraph{T,P}, F::Vector{T}, N::Vector{T}) where {T,P}
     M = zeros(Int, length(F), length(N))
 
     for i = 1:length(F)
@@ -421,24 +433,28 @@ end
 Return result and steps of Gaussian elimination of matrix `M`. Here we assume
 that the elements of `M` is in binary field F_2 = {0,1}.
 """
-function gaussian_elimination(M::Matrix{T}, steps::Vector{GEStep} = Vector{GEStep}(); rev = false) where {T<:Integer}
+function gaussian_elimination(
+    M::Matrix{T},
+    steps::Vector{GEStep} = Vector{GEStep}();
+    rev = false,
+) where {T<:Integer}
     M = copy(M)
     nr, nc = size(M)
     current_col = 1
     for i = 1:nr
-        if sum(M[i,:]) == 0
+        if sum(M[i, :]) == 0
             continue
         end
         while current_col <= nc
             rs = findall(!iszero, M[i:nr, current_col])
             if length(rs) > 0
-                sort!(rs, by = k -> sum(M[k,:]), rev = rev)
+                sort!(rs, by = k -> sum(M[k, :]), rev = rev)
                 r0 = rs[1]
                 r0 += i - 1
                 r0 == i && break
-                M_r0 = M[r0,:]
-                M[r0,:] = M[i,:]
-                M[i,:] = M_r0
+                M_r0 = M[r0, :]
+                M[r0, :] = M[i, :]
+                M[i, :] = M_r0
                 step = GEStep(:swap, r0, i)
                 push!(steps, step)
                 break
@@ -450,7 +466,7 @@ function gaussian_elimination(M::Matrix{T}, steps::Vector{GEStep} = Vector{GESte
         for j = 1:nr
             j == i && continue
             if M[j, current_col] == M[i, current_col]
-                M[j,:] = M[j,:] .⊻ M[i,:]
+                M[j, :] = M[j, :] .⊻ M[i, :]
                 step = GEStep(:addto, i, j)
                 push!(steps, step)
             end

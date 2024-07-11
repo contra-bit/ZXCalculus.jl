@@ -1,28 +1,34 @@
 module SpiderType
-    @enum SType Z X H In Out
+@enum SType Z X H In Out
 end  # module SpiderType
 
 """
     ZXDiagram{T, P}
 This is the type for representing ZX-diagrams.
 """
-struct ZXDiagram{T<:Integer, P} <: AbstractZXDiagram{T, P}
+struct ZXDiagram{T<:Integer,P} <: AbstractZXDiagram{T,P}
     mg::Multigraph{T}
 
-    st::Dict{T, SpiderType.SType}
-    ps::Dict{T, P}
+    st::Dict{T,SpiderType.SType}
+    ps::Dict{T,P}
 
     layout::ZXLayout{T}
-    phase_ids::Dict{T, Tuple{T, Int}}
+    phase_ids::Dict{T,Tuple{T,Int}}
 
     scalar::Scalar{P}
     inputs::Vector{T}
     outputs::Vector{T}
 
-    function ZXDiagram{T, P}(mg::Multigraph{T}, st::Dict{T, SpiderType.SType}, ps::Dict{T, P},
-        layout::ZXLayout{T}, phase_ids::Dict{T, Tuple{T, Int}} = Dict{T, Tuple{T, Int}}(),
-        s::Scalar{P} = Scalar{P}(), 
-        inputs::Vector{T} = Vector{T}(), outputs::Vector{T} = Vector{T}()) where {T<:Integer, P}
+    function ZXDiagram{T,P}(
+        mg::Multigraph{T},
+        st::Dict{T,SpiderType.SType},
+        ps::Dict{T,P},
+        layout::ZXLayout{T},
+        phase_ids::Dict{T,Tuple{T,Int}} = Dict{T,Tuple{T,Int}}(),
+        s::Scalar{P} = Scalar{P}(),
+        inputs::Vector{T} = Vector{T}(),
+        outputs::Vector{T} = Vector{T}(),
+    ) where {T<:Integer,P}
         if nv(mg) == length(ps) && nv(mg) == length(st)
             if length(phase_ids) == 0
                 for v in vertices(mg)
@@ -51,7 +57,7 @@ struct ZXDiagram{T<:Integer, P} <: AbstractZXDiagram{T, P}
                     sort!(outputs, by = (v -> qubit_loc(layout, v)))
                 end
             end
-            zxd = new{T, P}(mg, st, ps, layout, phase_ids, s, inputs, outputs)
+            zxd = new{T,P}(mg, st, ps, layout, phase_ids, s, inputs, outputs)
             round_phases!(zxd)
             return zxd
         else
@@ -89,11 +95,19 @@ ZX-diagram with 5 vertices and 4 multiple edges:
 
 ```
 """
-ZXDiagram(mg::Multigraph{T}, st::Dict{T, SpiderType.SType}, ps::Dict{T, P},
+ZXDiagram(
+    mg::Multigraph{T},
+    st::Dict{T,SpiderType.SType},
+    ps::Dict{T,P},
     layout::ZXLayout{T} = ZXLayout{T}(),
-    phase_ids::Dict{T,Tuple{T, Int}} = Dict{T,Tuple{T,Int}}()) where {T, P} = ZXDiagram{T, P}(mg, st, ps, layout, phase_ids)
-ZXDiagram(mg::Multigraph{T}, st::Vector{SpiderType.SType}, ps::Vector{P},
-    layout::ZXLayout{T} = ZXLayout{T}()) where {T, P} =
+    phase_ids::Dict{T,Tuple{T,Int}} = Dict{T,Tuple{T,Int}}(),
+) where {T,P} = ZXDiagram{T,P}(mg, st, ps, layout, phase_ids)
+ZXDiagram(
+    mg::Multigraph{T},
+    st::Vector{SpiderType.SType},
+    ps::Vector{P},
+    layout::ZXLayout{T} = ZXLayout{T}(),
+) where {T,P} =
     ZXDiagram(mg, Dict(zip(sort!(vertices(mg)), st)), Dict(zip(sort!(vertices(mg)), ps)), layout)
 
 """
@@ -111,13 +125,13 @@ ZX-diagram with 6 vertices and 3 multiple edges:
 ```
 """
 function ZXDiagram(nbits::T) where {T<:Integer}
-    mg = Multigraph(2*nbits)
+    mg = Multigraph(2 * nbits)
     st = [SpiderType.In for _ = 1:2*nbits]
-    ps = [Phase(0//1) for _ = 1:2*nbits]
-    spider_q = Dict{T, Rational{Int}}()
-    spider_col = Dict{T, Rational{Int}}()
+    ps = [Phase(0 // 1) for _ = 1:2*nbits]
+    spider_q = Dict{T,Rational{Int}}()
+    spider_col = Dict{T,Rational{Int}}()
     for i = 1:nbits
-        add_edge!(mg, 2*i-1, 2*i)
+        add_edge!(mg, 2 * i - 1, 2 * i)
         @inbounds st[2*i] = SpiderType.Out
         spider_q[2*i-1] = i
         spider_col[2*i-1] = 2
@@ -128,22 +142,30 @@ function ZXDiagram(nbits::T) where {T<:Integer}
     return ZXDiagram(mg, st, ps, layout)
 end
 
-Base.copy(zxd::ZXDiagram{T, P}) where {T, P} = ZXDiagram{T, P}(copy(zxd.mg), copy(zxd.st), copy(zxd.ps), copy(zxd.layout),
-    deepcopy(zxd.phase_ids), copy(zxd.scalar), copy(zxd.inputs), copy(zxd.outputs))
+Base.copy(zxd::ZXDiagram{T,P}) where {T,P} = ZXDiagram{T,P}(
+    copy(zxd.mg),
+    copy(zxd.st),
+    copy(zxd.ps),
+    copy(zxd.layout),
+    deepcopy(zxd.phase_ids),
+    copy(zxd.scalar),
+    copy(zxd.inputs),
+    copy(zxd.outputs),
+)
 
 """
     spider_type(zxd, v)
 
 Returns the spider type of a spider.
 """
-spider_type(zxd::ZXDiagram{T, P}, v::T) where {T<:Integer, P} = zxd.st[v]
+spider_type(zxd::ZXDiagram{T,P}, v::T) where {T<:Integer,P} = zxd.st[v]
 
 """
     phase(zxd, v)
 
 Returns the phase of a spider. If the spider is not a Z or X spider, then return 0.
 """
-phase(zxd::ZXDiagram{T, P}, v::T) where {T<:Integer, P} = zxd.ps[v]
+phase(zxd::ZXDiagram{T,P}, v::T) where {T<:Integer,P} = zxd.ps[v]
 
 
 """
@@ -151,7 +173,7 @@ phase(zxd::ZXDiagram{T, P}, v::T) where {T<:Integer, P} = zxd.ps[v]
 
 Set the phase of `v` in `zxd` to `p`.
 """
-function set_phase!(zxd::ZXDiagram{T, P}, v::T, p::P) where {T, P}
+function set_phase!(zxd::ZXDiagram{T,P}, v::T, p::P) where {T,P}
     if has_vertex(zxd.mg, v)
         while p < 0
             p += 2
@@ -171,12 +193,20 @@ Returns the qubit number of a ZX-diagram.
 """
 nqubits(zxd::ZXDiagram) = zxd.layout.nbits
 
-function print_spider(io::IO, zxd::ZXDiagram{T, P}, v::T) where {T<:Integer, P}
+function print_spider(io::IO, zxd::ZXDiagram{T,P}, v::T) where {T<:Integer,P}
     st_v = spider_type(zxd, v)
     if st_v == SpiderType.Z
-        printstyled(io, "S_$(v){phase = $(zxd.ps[v])"*(zxd.ps[v] isa Phase ? "}" : "⋅π}"); color = :green)
+        printstyled(
+            io,
+            "S_$(v){phase = $(zxd.ps[v])" * (zxd.ps[v] isa Phase ? "}" : "⋅π}");
+            color = :green,
+        )
     elseif st_v == SpiderType.X
-        printstyled(io, "S_$(v){phase = $(zxd.ps[v])"*(zxd.ps[v] isa Phase ? "}" : "⋅π}"); color = :red)
+        printstyled(
+            io,
+            "S_$(v){phase = $(zxd.ps[v])" * (zxd.ps[v] isa Phase ? "}" : "⋅π}");
+            color = :red,
+        )
     elseif st_v == SpiderType.H
         printstyled(io, "S_$(v){H}"; color = :yellow)
     elseif st_v == SpiderType.In
@@ -186,7 +216,7 @@ function print_spider(io::IO, zxd::ZXDiagram{T, P}, v::T) where {T<:Integer, P}
     end
 end
 
-function Base.show(io::IO, zxd::ZXDiagram{T, P}) where {T<:Integer, P}
+function Base.show(io::IO, zxd::ZXDiagram{T,P}) where {T<:Integer,P}
     println(io, "ZX-diagram with $(nv(zxd.mg)) vertices and $(ne(zxd.mg)) multiple edges:")
     for v1 in sort!(vertices(zxd.mg))
         for v2 in neighbors(zxd.mg, v1)
@@ -217,8 +247,10 @@ number of multiple edges.
 """
 Graphs.ne(zxd::ZXDiagram; count_mul::Bool = false) = ne(zxd.mg, count_mul = count_mul)
 
-Graphs.outneighbors(zxd::ZXDiagram, v; count_mul::Bool = false) = outneighbors(zxd.mg, v, count_mul = count_mul)
-Graphs.inneighbors(zxd::ZXDiagram, v; count_mul::Bool = false) = inneighbors(zxd.mg, v, count_mul = count_mul)
+Graphs.outneighbors(zxd::ZXDiagram, v; count_mul::Bool = false) =
+    outneighbors(zxd.mg, v, count_mul = count_mul)
+Graphs.inneighbors(zxd::ZXDiagram, v; count_mul::Bool = false) =
+    inneighbors(zxd.mg, v, count_mul = count_mul)
 
 Graphs.degree(zxd::ZXDiagram, v::Integer) = degree(zxd.mg, v)
 Graphs.indegree(zxd::ZXDiagram, v::Integer) = degree(zxd, v)
@@ -230,7 +262,8 @@ Graphs.outdegree(zxd::ZXDiagram, v::Integer) = degree(zxd, v)
 Returns a vector of vertices connected to `v`. If `count_mul`, there will be
 multiple copy for each vertex. Otherwise, each vertex will only appear once.
 """
-Graphs.neighbors(zxd::ZXDiagram, v; count_mul::Bool = false) = neighbors(zxd.mg, v, count_mul = count_mul)
+Graphs.neighbors(zxd::ZXDiagram, v; count_mul::Bool = false) =
+    neighbors(zxd.mg, v, count_mul = count_mul)
 function Graphs.rem_edge!(zxd::ZXDiagram, x...)
     rem_edge!(zxd.mg, x...)
 end
@@ -243,7 +276,7 @@ end
 
 Remove spiders indexed by `vs`.
 """
-function rem_spiders!(zxd::ZXDiagram{T, P}, vs::Vector{T}) where {T<:Integer, P}
+function rem_spiders!(zxd::ZXDiagram{T,P}, vs::Vector{T}) where {T<:Integer,P}
     if rem_vertices!(zxd.mg, vs)
         for v in vs
             delete!(zxd.ps, v)
@@ -261,7 +294,7 @@ end
 
 Remove a spider indexed by `v`.
 """
-rem_spider!(zxd::ZXDiagram{T, P}, v::T) where {T<:Integer, P} = rem_spiders!(zxd, [v])
+rem_spider!(zxd::ZXDiagram{T,P}, v::T) where {T<:Integer,P} = rem_spiders!(zxd, [v])
 
 """
     add_spider!(zxd, spider_type, phase = 0, connect = [])
@@ -269,7 +302,12 @@ rem_spider!(zxd::ZXDiagram{T, P}, v::T) where {T<:Integer, P} = rem_spiders!(zxd
 Add a new spider which is of the type `spider_type` with phase `phase` and
 connected to the vertices `connect`.
 """
-function add_spider!(zxd::ZXDiagram{T, P}, st::SpiderType.SType, phase::P = zero(P), connect::Vector{T}=T[]) where {T<:Integer, P}
+function add_spider!(
+    zxd::ZXDiagram{T,P},
+    st::SpiderType.SType,
+    phase::P = zero(P),
+    connect::Vector{T} = T[],
+) where {T<:Integer,P}
     v = add_vertex!(zxd.mg)[1]
     set_phase!(zxd, v, phase)
     zxd.st[v] = st
@@ -292,7 +330,13 @@ vertices `v1` and `v2`. It will insert multiple times if the edge between
 `v1` and `v2` is a multiple edge. Also it will remove the original edge between
 `v1` and `v2`.
 """
-function insert_spider!(zxd::ZXDiagram{T, P}, v1::T, v2::T, st::SpiderType.SType, phase::P = zero(P)) where {T<:Integer, P}
+function insert_spider!(
+    zxd::ZXDiagram{T,P},
+    v1::T,
+    v2::T,
+    st::SpiderType.SType,
+    phase::P = zero(P),
+) where {T<:Integer,P}
     mt = mul(zxd.mg, v1, v2)
     vs = Vector{T}(undef, mt)
     for i = 1:mt
@@ -308,7 +352,7 @@ end
 
 Round phases between [0, 2π).
 """
-function round_phases!(zxd::ZXDiagram{T, P}) where {T<:Integer, P}
+function round_phases!(zxd::ZXDiagram{T,P}) where {T<:Integer,P}
     ps = zxd.ps
     for v in keys(ps)
         while ps[v] < 0
@@ -320,8 +364,8 @@ function round_phases!(zxd::ZXDiagram{T, P}) where {T<:Integer, P}
 end
 
 spiders(zxd::ZXDiagram) = vertices(zxd.mg)
-qubit_loc(zxd::ZXDiagram{T, P}, v::T) where {T, P} = qubit_loc(zxd.layout, v)
-function column_loc(zxd::ZXDiagram{T, P}, v::T) where {T, P}
+qubit_loc(zxd::ZXDiagram{T,P}, v::T) where {T,P} = qubit_loc(zxd.layout, v)
+function column_loc(zxd::ZXDiagram{T,P}, v::T) where {T,P}
     c_loc = column_loc(zxd.layout, v)
     return c_loc
 end
@@ -334,7 +378,13 @@ If `M` is `:Z` or `:X`, `phase` will be available and it will push a
 rotation `M` gate with angle `phase * π`.
 If `autoconvert` is `false`, the input `phase` should be a rational numbers.
 """
-function push_gate!(zxd::ZXDiagram{T, P}, ::Val{:Z}, loc::T, phase = zero(P); autoconvert::Bool=true) where {T, P}
+function push_gate!(
+    zxd::ZXDiagram{T,P},
+    ::Val{:Z},
+    loc::T,
+    phase = zero(P);
+    autoconvert::Bool = true,
+) where {T,P}
     @inbounds out_id = get_outputs(zxd)[loc]
     @inbounds bound_id = neighbors(zxd, out_id)[1]
     rphase = autoconvert ? safe_convert(P, phase) : phase
@@ -342,7 +392,13 @@ function push_gate!(zxd::ZXDiagram{T, P}, ::Val{:Z}, loc::T, phase = zero(P); au
     return zxd
 end
 
-function push_gate!(zxd::ZXDiagram{T, P}, ::Val{:X}, loc::T, phase = zero(P); autoconvert::Bool=true) where {T, P}
+function push_gate!(
+    zxd::ZXDiagram{T,P},
+    ::Val{:X},
+    loc::T,
+    phase = zero(P);
+    autoconvert::Bool = true,
+) where {T,P}
     @inbounds out_id = get_outputs(zxd)[loc]
     @inbounds bound_id = neighbors(zxd, out_id)[1]
     rphase = autoconvert ? safe_convert(P, phase) : phase
@@ -350,14 +406,14 @@ function push_gate!(zxd::ZXDiagram{T, P}, ::Val{:X}, loc::T, phase = zero(P); au
     return zxd
 end
 
-function push_gate!(zxd::ZXDiagram{T, P}, ::Val{:H}, loc::T) where {T, P}
+function push_gate!(zxd::ZXDiagram{T,P}, ::Val{:H}, loc::T) where {T,P}
     @inbounds out_id = get_outputs(zxd)[loc]
     @inbounds bound_id = neighbors(zxd, out_id)[1]
     insert_spider!(zxd, bound_id, out_id, SpiderType.H)
     return zxd
 end
 
-function push_gate!(zxd::ZXDiagram{T, P}, ::Val{:SWAP}, locs::Vector{T}) where {T, P}
+function push_gate!(zxd::ZXDiagram{T,P}, ::Val{:SWAP}, locs::Vector{T}) where {T,P}
     q1, q2 = locs
     push_gate!(zxd, Val{:Z}(), q1)
     push_gate!(zxd, Val{:Z}(), q2)
@@ -371,7 +427,7 @@ function push_gate!(zxd::ZXDiagram{T, P}, ::Val{:SWAP}, locs::Vector{T}) where {
     return zxd
 end
 
-function push_gate!(zxd::ZXDiagram{T, P}, ::Val{:CNOT}, loc::T, ctrl::T) where {T, P}
+function push_gate!(zxd::ZXDiagram{T,P}, ::Val{:CNOT}, loc::T, ctrl::T) where {T,P}
     push_gate!(zxd, Val{:Z}(), ctrl)
     push_gate!(zxd, Val{:X}(), loc)
     @inbounds v1, v2 = (sort!(spiders(zxd)))[end-1:end]
@@ -380,7 +436,7 @@ function push_gate!(zxd::ZXDiagram{T, P}, ::Val{:CNOT}, loc::T, ctrl::T) where {
     return zxd
 end
 
-function push_gate!(zxd::ZXDiagram{T, P}, ::Val{:CZ}, loc::T, ctrl::T) where {T, P}
+function push_gate!(zxd::ZXDiagram{T,P}, ::Val{:CZ}, loc::T, ctrl::T) where {T,P}
     push_gate!(zxd, Val{:Z}(), ctrl)
     push_gate!(zxd, Val{:Z}(), loc)
     @inbounds v1, v2 = (sort!(spiders(zxd)))[end-1:end]
@@ -397,28 +453,28 @@ Push an `M` gate to the beginning of qubit `loc` where `M` can be `:Z`, `:X`, `:
 If `M` is `:Z` or `:X`, `phase` will be available and it will push a
 rotation `M` gate with angle `phase * π`.
 """
-function pushfirst_gate!(zxd::ZXDiagram{T, P}, ::Val{:Z}, loc::T, phase::P = zero(P)) where {T, P}
+function pushfirst_gate!(zxd::ZXDiagram{T,P}, ::Val{:Z}, loc::T, phase::P = zero(P)) where {T,P}
     @inbounds in_id = get_inputs(zxd)[loc]
     @inbounds bound_id = neighbors(zxd, in_id)[1]
     insert_spider!(zxd, in_id, bound_id, SpiderType.Z, phase)
     return zxd
 end
 
-function pushfirst_gate!(zxd::ZXDiagram{T, P}, ::Val{:X}, loc::T, phase::P = zero(P)) where {T, P}
+function pushfirst_gate!(zxd::ZXDiagram{T,P}, ::Val{:X}, loc::T, phase::P = zero(P)) where {T,P}
     @inbounds in_id = get_inputs(zxd)[loc]
     @inbounds bound_id = neighbors(zxd, in_id)[1]
     insert_spider!(zxd, in_id, bound_id, SpiderType.X, phase)
     return zxd
 end
 
-function pushfirst_gate!(zxd::ZXDiagram{T, P}, ::Val{:H}, loc::T) where {T, P}
+function pushfirst_gate!(zxd::ZXDiagram{T,P}, ::Val{:H}, loc::T) where {T,P}
     @inbounds in_id = get_inputs(zxd)[loc]
     @inbounds bound_id = neighbors(zxd, in_id)[1]
     insert_spider!(zxd, in_id, bound_id, SpiderType.H)
     return zxd
 end
 
-function pushfirst_gate!(zxd::ZXDiagram{T, P}, ::Val{:SWAP}, locs::Vector{T}) where {T, P}
+function pushfirst_gate!(zxd::ZXDiagram{T,P}, ::Val{:SWAP}, locs::Vector{T}) where {T,P}
     q1, q2 = locs
     pushfirst_gate!(zxd, Val{:Z}(), q1)
     pushfirst_gate!(zxd, Val{:Z}(), q2)
@@ -432,7 +488,7 @@ function pushfirst_gate!(zxd::ZXDiagram{T, P}, ::Val{:SWAP}, locs::Vector{T}) wh
     return zxd
 end
 
-function pushfirst_gate!(zxd::ZXDiagram{T, P}, ::Val{:CNOT}, loc::T, ctrl::T) where {T, P}
+function pushfirst_gate!(zxd::ZXDiagram{T,P}, ::Val{:CNOT}, loc::T, ctrl::T) where {T,P}
     pushfirst_gate!(zxd, Val{:Z}(), ctrl)
     pushfirst_gate!(zxd, Val{:X}(), loc)
     @inbounds v1, v2 = (sort!(spiders(zxd)))[end-1:end]
@@ -441,7 +497,7 @@ function pushfirst_gate!(zxd::ZXDiagram{T, P}, ::Val{:CNOT}, loc::T, ctrl::T) wh
     return zxd
 end
 
-function pushfirst_gate!(zxd::ZXDiagram{T, P}, ::Val{:CZ}, loc::T, ctrl::T) where {T, P}
+function pushfirst_gate!(zxd::ZXDiagram{T,P}, ::Val{:CZ}, loc::T, ctrl::T) where {T,P}
     pushfirst_gate!(zxd, Val{:Z}(), ctrl)
     pushfirst_gate!(zxd, Val{:Z}(), loc)
     @inbounds v1, v2 = (sort!(spiders(zxd)))[end-1:end]
@@ -465,7 +521,7 @@ end
 
 Returns the T-count of a ZX-diagram.
 """
-tcount(cir::ZXDiagram) = sum([phase(cir, v) % 1//2 != 0 for v in spiders(cir)])
+tcount(cir::ZXDiagram) = sum([phase(cir, v) % 1 // 2 != 0 for v in spiders(cir)])
 
 """
     get_inputs(zxd)
@@ -488,7 +544,7 @@ Returns the scalar of `zxd`.
 """
 scalar(zxd::ZXDiagram) = zxd.scalar
 
-function add_global_phase!(zxd::ZXDiagram{T, P}, p::P) where {T, P}
+function add_global_phase!(zxd::ZXDiagram{T,P}, p::P) where {T,P}
     add_phase!(zxd.scalar, p)
     return zxd
 end
@@ -498,27 +554,27 @@ function add_power!(zxd::ZXDiagram, n)
     return zxd
 end
 
-function spider_sequence(zxd::ZXDiagram{T, P}) where {T, P}
+function spider_sequence(zxd::ZXDiagram{T,P}) where {T,P}
     seq = []
     generate_layout!(zxd, seq)
     return seq
 end
 
-function generate_layout!(zxd::ZXDiagram{T, P}, seq::Vector{Any} = []) where {T, P}
+function generate_layout!(zxd::ZXDiagram{T,P}, seq::Vector{Any} = []) where {T,P}
     layout = zxd.layout
     nbits = length(zxd.inputs)
     vs_frontier = copy(zxd.inputs)
     vs_generated = Set(vs_frontier)
-    frontier_col = [1//1 for _ = 1:nbits]
+    frontier_col = [1 // 1 for _ = 1:nbits]
     frontier_active = [true for _ = 1:nbits]
     for i = 1:nbits
         set_qubit!(layout, vs_frontier[i], i)
-        set_column!(layout, vs_frontier[i], 1//1)
+        set_column!(layout, vs_frontier[i], 1 // 1)
     end
 
     while !(zxd.outputs ⊆ vs_frontier)
         while any(frontier_active)
-            for q in 1:nbits
+            for q = 1:nbits
                 if frontier_active[q]
                     v = vs_frontier[q]
                     nb = neighbors(zxd, v)
@@ -560,7 +616,7 @@ function generate_layout!(zxd::ZXDiagram{T, P}, seq::Vector{Any} = []) where {T,
                         new_v = nb[findfirst(v -> !(v in vs_generated), nb)]
                         vs_frontier[q] = new_v
                         vs_frontier[q1] = new_v1
-                        for i in min(q, q1):max(q, q1)
+                        for i = min(q, q1):max(q, q1)
                             frontier_col[i] = col + 1
                         end
                         frontier_active[q] = true
@@ -575,8 +631,8 @@ function generate_layout!(zxd::ZXDiagram{T, P}, seq::Vector{Any} = []) where {T,
                             col = maximum(frontier_col[min(q, q2):max(q, q2)])
                             set_loc!(layout, v, q, col)
                             set_loc!(layout, v2, q2, col)
-                            q1 = (q + q2)//2
-                            denominator(q1) == 1 && (q1 += 1//2)
+                            q1 = (q + q2) // 2
+                            denominator(q1) == 1 && (q1 += 1 // 2)
                             set_loc!(layout, v1, q1, col)
                             push!(vs_generated, v, v1, v2)
                             push!(seq, (v, v1, v2))
@@ -585,7 +641,7 @@ function generate_layout!(zxd::ZXDiagram{T, P}, seq::Vector{Any} = []) where {T,
                             new_v2 = nb_v2[findfirst(v -> !(v in vs_generated), nb_v2)]
                             vs_frontier[q] = new_v
                             vs_frontier[q2] = new_v2
-                            for i in min(q, q2):max(q, q2)
+                            for i = min(q, q2):max(q, q2)
                                 frontier_col[i] = col + 1
                             end
                             frontier_active[q] = true
@@ -614,15 +670,15 @@ function continued_fraction(fl, n::Int)
     if n == 1 || abs(mod(fl, 1)) < 1e-10
         Rational(floor(Int, fl), 1)
     else
-        floor(Int, fl) + 1//continued_fraction(1/mod(fl, 1), n-1)
+        floor(Int, fl) + 1 // continued_fraction(1 / mod(fl, 1), n - 1)
     end
 end
 
-safe_convert(::Type{T}, x) where T = convert(T, x)
-safe_convert(::Type{T}, x::T) where T<:Rational = x
-function safe_convert(::Type{T}, x::Real) where T<:Rational
+safe_convert(::Type{T}, x) where {T} = convert(T, x)
+safe_convert(::Type{T}, x::T) where {T<:Rational} = x
+function safe_convert(::Type{T}, x::Real) where {T<:Rational}
     local fr
-    for n=1:16 # at most 20 steps, otherwise the number may overflow.
+    for n = 1:16 # at most 20 steps, otherwise the number may overflow.
         fr = continued_fraction(x, n)
         abs(fr - x) < 1e-12 && return fr
     end

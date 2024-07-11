@@ -7,7 +7,7 @@ add_edge!(g, 2, 4)
 add_edge!(g, 3, 4)
 add_edge!(g, 3, 5)
 add_edge!(g, 4, 6)
-ps = [0//1 for i = 1:6]
+ps = [0 // 1 for i = 1:6]
 v_t = [SpiderType.In, SpiderType.In, SpiderType.X, SpiderType.Z, SpiderType.Out, SpiderType.Out]
 zxd = ZXDiagram(g, v_t, ps)
 zxg1 = ZXGraph(zxd)
@@ -27,10 +27,10 @@ push_gate!(zxd, Val(:CNOT), 2, 1)
 zxg = ZXGraph(zxd)
 
 zxg3 = ZXGraph(ZXDiagram(3))
-ZX.add_global_phase!(zxg3, ZXCalculus.Utils.Phase(1//4))
+ZX.add_global_phase!(zxg3, ZXCalculus.Utils.Phase(1 // 4))
 ZX.add_power!(zxg3, 3)
-@test ZX.scalar(zxg3) == Scalar(3, 1//4)
+@test ZX.scalar(zxg3) == Scalar(3, 1 // 4)
 @test degree(zxg3, 1) == indegree(zxg3, 1) == outdegree(zxg3, 1)
 @test ZX.qubit_loc(zxg3, 1) == ZX.qubit_loc(zxg3, 2)
-@test ZX.column_loc(zxg3, 1) == 1//1
-@test ZX.column_loc(zxg3, 2) == 3//1
+@test ZX.column_loc(zxg3, 1) == 1 // 1
+@test ZX.column_loc(zxg3, 2) == 3 // 1

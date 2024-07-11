@@ -1,5 +1,5 @@
 module EdgeType
-    @enum EType SIM HAD
+@enum EType SIM HAD
 end
 
 """
@@ -7,25 +7,31 @@ end
 
 This is the type for representing the graph-like ZX-diagrams.
 """
-struct ZXGraph{T<:Integer, P} <: AbstractZXDiagram{T, P}
+struct ZXGraph{T<:Integer,P} <: AbstractZXDiagram{T,P}
     mg::Multigraph{T}
-    ps::Dict{T, P}
-    st::Dict{T, SpiderType.SType}
-    et::Dict{Tuple{T, T}, EdgeType.EType}
+    ps::Dict{T,P}
+    st::Dict{T,SpiderType.SType}
+    et::Dict{Tuple{T,T},EdgeType.EType}
     layout::ZXLayout{T}
-    phase_ids::Dict{T,Tuple{T, Int}}
+    phase_ids::Dict{T,Tuple{T,Int}}
     scalar::Scalar{P}
-    master::ZXDiagram{T, P}
+    master::ZXDiagram{T,P}
     inputs::Vector{T}
     outputs::Vector{T}
 end
 
-function Base.copy(zxg::ZXGraph{T, P}) where {T, P}
-    ZXGraph{T, P}(
-        copy(zxg.mg), copy(zxg.ps),
-        copy(zxg.st), copy(zxg.et), copy(zxg.layout),
-        deepcopy(zxg.phase_ids), copy(zxg.scalar), 
-        copy(zxg.master), copy(zxg.inputs), copy(zxg.outputs)
+function Base.copy(zxg::ZXGraph{T,P}) where {T,P}
+    ZXGraph{T,P}(
+        copy(zxg.mg),
+        copy(zxg.ps),
+        copy(zxg.st),
+        copy(zxg.et),
+        copy(zxg.layout),
+        deepcopy(zxg.phase_ids),
+        copy(zxg.scalar),
+        copy(zxg.master),
+        copy(zxg.inputs),
+        copy(zxg.outputs),
     )
 end
 
@@ -49,7 +55,7 @@ ZX-graph with 6 vertices and 5 edges:
 
 ```
 """
-function ZXGraph(zxd::ZXDiagram{T, P}) where {T, P}
+function ZXGraph(zxd::ZXDiagram{T,P}) where {T,P}
     zxd = copy(zxd)
     nzxd = copy(zxd)
 
@@ -83,14 +89,28 @@ function ZXGraph(zxd::ZXDiagram{T, P}) where {T, P}
             push!(vB, v)
         end
     end
-    eH = [(neighbors(nzxd, v, count_mul = true)[1], neighbors(nzxd, v, count_mul = true)[2]) for v in vH]
+    eH = [
+        (neighbors(nzxd, v, count_mul = true)[1], neighbors(nzxd, v, count_mul = true)[2]) for
+        v in vH
+    ]
 
     rem_spiders!(nzxd, vH)
-    et = Dict{Tuple{T, T}, EdgeType.EType}()
+    et = Dict{Tuple{T,T},EdgeType.EType}()
     for e in edges(nzxd.mg)
         et[(src(e), dst(e))] = EdgeType.SIM
     end
-    zxg = ZXGraph{T, P}(nzxd.mg, nzxd.ps, nzxd.st, et, nzxd.layout, nzxd.phase_ids, nzxd.scalar, zxd, nzxd.inputs, nzxd.outputs)
+    zxg = ZXGraph{T,P}(
+        nzxd.mg,
+        nzxd.ps,
+        nzxd.st,
+        et,
+        nzxd.layout,
+        nzxd.phase_ids,
+        nzxd.scalar,
+        zxd,
+        nzxd.inputs,
+        nzxd.outputs,
+    )
 
     for e in eH
         v1, v2 = e
@@ -117,11 +137,16 @@ function Graphs.rem_edge!(zxg::ZXGraph, v1::Integer, v2::Integer)
     return false
 end
 
-function Graphs.add_edge!(zxg::ZXGraph, v1::Integer, v2::Integer, edge_type::EdgeType.EType = EdgeType.HAD)
+function Graphs.add_edge!(
+    zxg::ZXGraph,
+    v1::Integer,
+    v2::Integer,
+    edge_type::EdgeType.EType = EdgeType.HAD,
+)
     if has_vertex(zxg.mg, v1) && has_vertex(zxg.mg, v2)
         if v1 == v2
             if edge_type == EdgeType.HAD
-                set_phase!(zxg, v1, phase(zxg, v1)+1)
+                set_phase!(zxg, v1, phase(zxg, v1) + 1)
                 add_power!(zxg, -1)
             end
             return true
@@ -144,7 +169,7 @@ end
 
 spider_type(zxg::ZXGraph, v::Integer) = zxg.st[v]
 phase(zxg::ZXGraph, v::Integer) = zxg.ps[v]
-function set_phase!(zxg::ZXGraph{T, P}, v::T, p::P) where {T, P}
+function set_phase!(zxg::ZXGraph{T,P}, v::T, p::P) where {T,P}
     if has_vertex(zxg.mg, v)
         while p < 0
             p += 2
@@ -157,15 +182,15 @@ function set_phase!(zxg::ZXGraph{T, P}, v::T, p::P) where {T, P}
 end
 nqubits(zxg::ZXGraph) = zxg.layout.nbits
 
-qubit_loc(zxg::ZXGraph{T, P}, v::T) where {T, P} = qubit_loc(zxg.layout, v)
-function column_loc(zxg::ZXGraph{T, P}, v::T) where {T, P}
+qubit_loc(zxg::ZXGraph{T,P}, v::T) where {T,P} = qubit_loc(zxg.layout, v)
+function column_loc(zxg::ZXGraph{T,P}, v::T) where {T,P}
     c_loc = column_loc(zxg.layout, v)
     if c_loc !== nothing
         if spider_type(zxg, v) == SpiderType.Out
             nb = neighbors(zxg, v)
             if length(nb) == 1
                 nb = nb[1]
-                spider_type(zxg, nb) == SpiderType.In && return 3//1
+                spider_type(zxg, nb) == SpiderType.In && return 3 // 1
                 c_loc = floor(column_loc(zxg, nb) + 2)
             else
                 c_loc = 1000
@@ -173,7 +198,7 @@ function column_loc(zxg::ZXGraph{T, P}, v::T) where {T, P}
         end
         if spider_type(zxg, v) == SpiderType.In
             nb = neighbors(zxg, v)[1]
-            spider_type(zxg, nb) == SpiderType.Out && return 1//1
+            spider_type(zxg, nb) == SpiderType.Out && return 1 // 1
             c_loc = ceil(column_loc(zxg, nb) - 2)
         end
     end
@@ -191,7 +216,7 @@ function is_hadamard(zxg::ZXGraph, v1::Integer, v2::Integer)
 end
 spiders(zxg::ZXGraph) = vertices(zxg.mg)
 
-function rem_spiders!(zxg::ZXGraph{T, P}, vs::Vector{T}) where {T, P}
+function rem_spiders!(zxg::ZXGraph{T,P}, vs::Vector{T}) where {T,P}
     if rem_vertices!(zxg.mg, vs)
         for v in vs
             delete!(zxg.ps, v)
@@ -203,9 +228,14 @@ function rem_spiders!(zxg::ZXGraph{T, P}, vs::Vector{T}) where {T, P}
     end
     return false
 end
-rem_spider!(zxg::ZXGraph{T, P}, v::T) where {T, P} = rem_spiders!(zxg, [v])
+rem_spider!(zxg::ZXGraph{T,P}, v::T) where {T,P} = rem_spiders!(zxg, [v])
 
-function add_spider!(zxg::ZXGraph{T, P}, st::SpiderType.SType, phase::P = zero(P), connect::Vector{T}=T[]) where {T<:Integer, P}
+function add_spider!(
+    zxg::ZXGraph{T,P},
+    st::SpiderType.SType,
+    phase::P = zero(P),
+    connect::Vector{T} = T[],
+) where {T<:Integer,P}
     v = add_vertex!(zxg.mg)[1]
     set_phase!(zxg, v, phase)
     zxg.st[v] = st
@@ -219,18 +249,22 @@ function add_spider!(zxg::ZXGraph{T, P}, st::SpiderType.SType, phase::P = zero(P
     end
     return v
 end
-function insert_spider!(zxg::ZXGraph{T, P}, v1::T, v2::T, phase::P = zero(P)) where {T<:Integer, P}
+function insert_spider!(zxg::ZXGraph{T,P}, v1::T, v2::T, phase::P = zero(P)) where {T<:Integer,P}
     v = add_spider!(zxg, SpiderType.Z, phase, [v1, v2])
     rem_edge!(zxg, v1, v2)
     return v
 end
 
-tcount(cir::ZXGraph) = sum([phase(cir, v) % 1//2 != 0 for v in spiders(cir)])
+tcount(cir::ZXGraph) = sum([phase(cir, v) % 1 // 2 != 0 for v in spiders(cir)])
 
 function print_spider(io::IO, zxg::ZXGraph{T}, v::T) where {T<:Integer}
     st_v = spider_type(zxg, v)
     if st_v == SpiderType.Z
-        printstyled(io, "S_$(v){phase = $(phase(zxg, v))"*(zxg.ps[v] isa Phase ? "}" : "⋅π}"); color = :green)
+        printstyled(
+            io,
+            "S_$(v){phase = $(phase(zxg, v))" * (zxg.ps[v] isa Phase ? "}" : "⋅π}");
+            color = :green,
+        )
     elseif st_v == SpiderType.In
         print(io, "S_$(v){input}")
     elseif st_v == SpiderType.Out
@@ -258,7 +292,7 @@ function Base.show(io::IO, zxg::ZXGraph{T}) where {T<:Integer}
     end
 end
 
-function round_phases!(zxg::ZXGraph{T, P}) where {T<:Integer, P}
+function round_phases!(zxg::ZXGraph{T,P}) where {T<:Integer,P}
     ps = zxg.ps
     for v in keys(ps)
         while ps[v] < 0
@@ -273,9 +307,10 @@ end
 
 Return `true` if `v` is a interior spider of `zxg`.
 """
-function is_interior(zxg::ZXGraph{T, P}, v::T) where {T, P}
+function is_interior(zxg::ZXGraph{T,P}, v::T) where {T,P}
     if has_vertex(zxg.mg, v)
-        (spider_type(zxg, v) == SpiderType.In || spider_type(zxg, v) == SpiderType.Out) && return false
+        (spider_type(zxg, v) == SpiderType.In || spider_type(zxg, v) == SpiderType.Out) &&
+            return false
         for u in neighbors(zxg, v)
             if spider_type(zxg, u) == SpiderType.In || spider_type(zxg, u) == SpiderType.Out
                 return false
@@ -290,7 +325,7 @@ get_outputs(zxg::ZXGraph) = zxg.outputs
 get_inputs(zxg::ZXGraph) = zxg.inputs
 
 # TODO: remove it?
-function spider_sequence(zxg::ZXGraph{T, P}) where {T, P}
+function spider_sequence(zxg::ZXGraph{T,P}) where {T,P}
     nbits = nqubits(zxg)
     if nbits > 0
         vs = spiders(zxg)
@@ -311,17 +346,17 @@ function spider_sequence(zxg::ZXGraph{T, P}) where {T, P}
     end
 end
 
-function generate_layout!(zxg::ZXGraph{T, P}) where {T, P}
+function generate_layout!(zxg::ZXGraph{T,P}) where {T,P}
     layout = zxg.layout
     nbits = length(zxg.inputs)
     vs_frontier = copy(zxg.inputs)
     vs_generated = Set(vs_frontier)
     for i = 1:nbits
         set_qubit!(layout, vs_frontier[i], i)
-        set_column!(layout, vs_frontier[i], 1//1)
+        set_column!(layout, vs_frontier[i], 1 // 1)
     end
-    
-    curr_col = 1//1
+
+    curr_col = 1 // 1
 
     while !(isempty(vs_frontier))
         vs_after = Set{Int}()
@@ -341,16 +376,16 @@ function generate_layout!(zxg::ZXGraph{T, P}) where {T, P}
         vs_frontier = collect(vs_after)
         curr_col += 1
     end
-    gad_col = 2//1
+    gad_col = 2 // 1
     for v in spiders(zxg)
         if degree(zxg, v) == 1 && spider_type(zxg, v) == SpiderType.Z
             v1 = neighbors(zxg, v)[1]
-            set_loc!(layout, v, -1//1, gad_col)
-            set_loc!(layout, v1, 0//1, gad_col)
+            set_loc!(layout, v, -1 // 1, gad_col)
+            set_loc!(layout, v1, 0 // 1, gad_col)
             push!(vs_generated, v, v1)
             gad_col += 1
         elseif degree(zxg, v) == 0
-            set_loc!(layout, v, 0//1, gad_col)
+            set_loc!(layout, v, 0 // 1, gad_col)
             gad_col += 1
             push!(vs_generated, v)
         end
@@ -367,7 +402,7 @@ end
 
 scalar(zxg::ZXGraph) = zxg.scalar
 
-function add_global_phase!(zxg::ZXGraph{T, P}, p::P) where {T, P}
+function add_global_phase!(zxg::ZXGraph{T,P}, p::P) where {T,P}
     add_phase!(zxg.scalar, p)
     return zxg
 end

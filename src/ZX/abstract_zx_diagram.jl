@@ -6,10 +6,8 @@ Graphs.degree(zxd::AbstractZXDiagram, v) = throw(MethodError(Graphs.degree, (zxd
 Graphs.indegree(zxd::AbstractZXDiagram, v) = throw(MethodError(Graphs.indegree, (zxd, v)))
 Graphs.outdegree(zxd::AbstractZXDiagram, v) = throw(MethodError(Graphs.outdegree, (zxd, v)))
 Graphs.neighbors(zxd::AbstractZXDiagram, v) = throw(MethodError(Graphs.neighbors, (zxd, v)))
-Graphs.outneighbors(zxd::AbstractZXDiagram, v) =
-    throw(MethodError(Graphs.outneighbors, (zxd, v)))
-Graphs.inneighbors(zxd::AbstractZXDiagram, v) =
-    throw(MethodError(Graphs.inneighbors, (zxd, v)))
+Graphs.outneighbors(zxd::AbstractZXDiagram, v) = throw(MethodError(Graphs.outneighbors, (zxd, v)))
+Graphs.inneighbors(zxd::AbstractZXDiagram, v) = throw(MethodError(Graphs.inneighbors, (zxd, v)))
 Graphs.rem_edge!(zxd::AbstractZXDiagram, args...) =
     throw(MethodError(Graphs.rem_edge!, (zxd, args...)))
 Graphs.add_edge!(zxd::AbstractZXDiagram, args...) =
@@ -35,19 +33,14 @@ rem_spider!(zxd::AbstractZXDiagram, v) = throw(MethodError(ZX.rem_spider!, (zxd,
 rem_spiders!(zxd::AbstractZXDiagram, vs) = throw(MethodError(ZX.rem_spiders!, (zxd, vs)))
 qubit_loc(zxd::AbstractZXDiagram, v) = throw(MethodError(ZX.qubit_loc, (zxd, v)))
 column_loc(zxd::AbstractZXDiagram, v) = throw(MethodError(ZX.column_loc, (zxd, v)))
-add_global_phase!(zxd::AbstractZXDiagram, p) =
-    throw(MethodError(ZX.add_global_phase!, (zxd, p)))
+add_global_phase!(zxd::AbstractZXDiagram, p) = throw(MethodError(ZX.add_global_phase!, (zxd, p)))
 add_power!(zxd::AbstractZXDiagram, n) = throw(MethodError(ZX.add_power!, (zxd, n)))
-generate_layout!(zxd::AbstractZXDiagram, seq) =
-    throw(MethodError(ZX.generate_layout!, (zxd, seq)))
+generate_layout!(zxd::AbstractZXDiagram, seq) = throw(MethodError(ZX.generate_layout!, (zxd, seq)))
 
-set_phase!(zxd::AbstractZXDiagram, args...) =
-    throw(MethodError(ZX.set_phase!, (zxd, args...)))
-push_gate!(zxd::AbstractZXDiagram, args...) =
-    throw(MethodError(ZX.push_gate!, (zxd, args...)))
+set_phase!(zxd::AbstractZXDiagram, args...) = throw(MethodError(ZX.set_phase!, (zxd, args...)))
+push_gate!(zxd::AbstractZXDiagram, args...) = throw(MethodError(ZX.push_gate!, (zxd, args...)))
 pushfirst_gate!(zxd::AbstractZXDiagram, args...) =
     throw(MethodError(ZX.pushfirst_gate!, (zxd, args...)))
-add_spider!(zxd::AbstractZXDiagram, args...) =
-    throw(MethodError(ZX.add_spider!, (zxd, args...)))
+add_spider!(zxd::AbstractZXDiagram, args...) = throw(MethodError(ZX.add_spider!, (zxd, args...)))
 insert_spider!(zxd::AbstractZXDiagram, args...) =
     throw(MethodError(ZX.insert_spider!, (zxd, args...)))

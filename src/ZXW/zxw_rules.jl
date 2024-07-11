@@ -103,11 +103,7 @@ end
 Rewrite a ZX-diagram `zxd` with rule `r` for all vertices in `matches`. `matches`
 can be a vector of `Match` or just an instance of `Match`.
 """
-function rewrite!(
-    r::AbstractRule,
-    zxwd::ZXWDiagram{T,P},
-    matches::Vector{Match{T}},
-) where {T,P}
+function rewrite!(r::AbstractRule, zxwd::ZXWDiagram{T,P}, matches::Vector{Match{T}}) where {T,P}
     for each in matches
         rewrite!(r, zxwd, each)
     end

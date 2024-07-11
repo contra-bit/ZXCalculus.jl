@@ -13,7 +13,7 @@ mutable struct Scalar{P}
     end
 end
 
-function Scalar(n = 0, p = Phase(0//1))
+function Scalar(n = 0, p = Phase(0 // 1))
     return Scalar{Phase}(n, Phase(p))
 end
 
@@ -27,8 +27,10 @@ function add_phase!(s::Scalar{P}, p) where {P}
     return s
 end
 
-Base.:(*)(s1::Scalar, s2::Scalar) = Scalar(s1.power_of_sqrt_2 + s2.power_of_sqrt_2, s1.phase + s2.phase)
-Base.:(==)(s1::Scalar, s2::Scalar) = (s1.power_of_sqrt_2 == s2.power_of_sqrt_2 && s1.phase == s2.phase)
+Base.:(*)(s1::Scalar, s2::Scalar) =
+    Scalar(s1.power_of_sqrt_2 + s2.power_of_sqrt_2, s1.phase + s2.phase)
+Base.:(==)(s1::Scalar, s2::Scalar) =
+    (s1.power_of_sqrt_2 == s2.power_of_sqrt_2 && s1.phase == s2.phase)
 Base.copy(s::Scalar{P}) where {P} = Scalar{P}(s.power_of_sqrt_2, s.phase)
 
-unwrap_scalar(s::Scalar) = 2^(s.power_of_sqrt_2/2) * exp(im*unwrap_phase(s.phase))
+unwrap_scalar(s::Scalar) = 2^(s.power_of_sqrt_2 / 2) * exp(im * unwrap_phase(s.phase))

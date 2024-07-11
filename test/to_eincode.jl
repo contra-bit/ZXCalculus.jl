@@ -1,6 +1,5 @@
 using Test, ZXCalculus, LinearAlgebra, ZXCalculus.Utils, ZXCalculus.ZXW
-using ZXCalculus.Application:
-    z_tensor, x_tensor, w_tensor, h_tensor, d_tensor
+using ZXCalculus.Application: z_tensor, x_tensor, w_tensor, h_tensor, d_tensor
 using ZXCalculus.Utils: Parameter
 using ZXCalculus.ZXW: push_gate!
 

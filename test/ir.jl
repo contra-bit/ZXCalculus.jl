@@ -33,14 +33,13 @@ push_gate!(chain, Val(:S), 3)
 push_gate!(chain, Val(:X), 4)
 push_gate!(chain, Val(:CNOT), 3, 2)
 push_gate!(chain, Val(:H), 1)
-push_gate!(chain, Val(:shift), 4, ZXCalculus.Phase(1//2))
-push_gate!(chain, Val(:Rx), 4, ZXCalculus.Phase(1//1))
-push_gate!(chain, Val(:Rx), 3, ZXCalculus.Phase(1//4))
-push_gate!(chain, Val(:Rx), 2, ZXCalculus.Phase(1//4))
+push_gate!(chain, Val(:shift), 4, ZXCalculus.Phase(1 // 2))
+push_gate!(chain, Val(:Rx), 4, ZXCalculus.Phase(1 // 1))
+push_gate!(chain, Val(:Rx), 3, ZXCalculus.Phase(1 // 4))
+push_gate!(chain, Val(:Rx), 2, ZXCalculus.Phase(1 // 4))
 push_gate!(chain, Val(:S), 3)
 
-ir = @make_ircode begin
-end
+ir = @make_ircode begin end
 bir = BlockIR(ir, 4, chain)
 zxd = convert_to_zxd(bir)
 convert_to_chain(zxd)
@@ -55,7 +54,7 @@ cl_chain = circuit_extraction(zxg)
 zxg = full_reduction(zxd)
 fl_chain = circuit_extraction(zxg)
 ZXCalculus.generate_layout!(zxg)
-@test ZXCalculus.qubit_loc(zxg, 40) == 0//1
+@test ZXCalculus.qubit_loc(zxg, 40) == 0 // 1
 ZXCalculus.spider_sequence(zxg)
 
 pt_bir = phase_teleportation(bir)
@@ -67,18 +66,118 @@ fl_bir = full_reduction(bir)
 @test length(fl_chain) == length(fl_bir.circuit)
 
 @testset "issue#80" begin
-    ir = @make_ircode begin
-    end
+    ir = @make_ircode begin end
 
     circuit = Chain(Gate(X, Locations(1)), Gate(X, Locations(1)))
     bir = BlockIR(ir, 1, circuit)
     bir = clifford_simplification(bir)
     bir = clifford_simplification(bir)
-    @test bir.circuit == Chain(Gate(H, Locations((1, ))), Gate(H, Locations((1, ))))
+    @test bir.circuit == Chain(Gate(H, Locations((1,))), Gate(H, Locations((1,))))
 end
 
 @testset "generate_layout!" begin
-    circ = Chain(Gate(H, Locations(2)), Gate(T, Locations(4)), Gate(H, Locations(1)), Gate(AdjointOperation{SGate}(S), Locations(2)), Gate(H, Locations(2)), Gate(X, Locations(3)), Gate(AdjointOperation{SGate}(S), Locations(1)), Gate(Z, Locations(1)), Gate(H, Locations(2)), Gate(X, Locations(1)), Gate(Z, Locations(1)), Gate(T, Locations(5)), Ctrl(Gate(X, Locations(5)), CtrlLocations(1)), Gate(H, Locations(1)), Gate(T, Locations(1)), Ctrl(Gate(X, Locations(3)), CtrlLocations(5)), Gate(H, Locations(1)), Gate(X, Locations(4)), Ctrl(Gate(X, Locations(5)), CtrlLocations(4)), Gate(S, Locations(2)), Ctrl(Gate(X, Locations(1)), CtrlLocations(3)), Gate(X, Locations(2)), Ctrl(Gate(X, Locations(3)), CtrlLocations(1)), Gate(X, Locations(2)), Gate(S, Locations(3)), Gate(Z, Locations(2)), Gate(Z, Locations(5)), Gate(X, Locations(2)), Gate(X, Locations(1)), Ctrl(Gate(X, Locations(3)), CtrlLocations(5)), Gate(S, Locations(4)), Gate(X, Locations(3)), Ctrl(Gate(X, Locations(1)), CtrlLocations(2)), Gate(AdjointOperation{SGate}(S), Locations(4)), Gate(Z, Locations(2)), Gate(AdjointOperation{SGate}(S), Locations(5)), Ctrl(Gate(X, Locations(1)), CtrlLocations(2)), Gate(Z, Locations(5)), Ctrl(Gate(X, Locations(1)), CtrlLocations(4)), Ctrl(Gate(X, Locations(3)), CtrlLocations(4)), Gate(H, Locations(4)), Gate(Z, Locations(1)), Gate(X, Locations(4)), Gate(Z, Locations(3)), Gate(H, Locations(4)), Ctrl(Gate(X, Locations(1)), CtrlLocations(4)), Ctrl(Gate(X, Locations(4)), CtrlLocations(1)), Gate(X, Locations(4)), Gate(S, Locations(3)), Gate(AdjointOperation{SGate}(S), Locations(2)), Gate(Z, Locations(3)), Gate(S, Locations(5)), Ctrl(Gate(X, Locations(3)), CtrlLocations(5)), Gate(H, Locations(2)), Gate(Z, Locations(4)), Gate(H, Locations(1)), Gate(X, Locations(1)), Gate(X, Locations(2)), Ctrl(Gate(X, Locations(5)), CtrlLocations(3)), Ctrl(Gate(X, Locations(1)), CtrlLocations(3)), Gate(Z, Locations(4)), Gate(S, Locations(5)), Gate(S, Locations(5)), Ctrl(Gate(X, Locations(5)), CtrlLocations(1)), Gate(T, Locations(4)), Gate(Z, Locations(2)), Gate(X, Locations(4)), Gate(H, Locations(2)), Gate(AdjointOperation{SGate}(S), Locations(3)), Gate(H, Locations(5)), Gate(T, Locations(2)), Gate(AdjointOperation{SGate}(S), Locations(5)), Gate(AdjointOperation{SGate}(S), Locations(4)), Gate(H, Locations(2)), Gate(S, Locations(2)), Gate(AdjointOperation{SGate}(S), Locations(3)), Ctrl(Gate(X, Locations(5)), CtrlLocations(1)), Gate(H, Locations(5)), Ctrl(Gate(X, Locations(4)), CtrlLocations(3)), Gate(H, Locations(4)), Gate(Z, Locations(2)), Gate(H, Locations(2)), Gate(S, Locations(2)), Gate(H, Locations(4)), Ctrl(Gate(X, Locations(1)), CtrlLocations(2)), Gate(X, Locations(4)), Gate(H, Locations(1)), Gate(AdjointOperation{SGate}(S), Locations(5)), Gate(X, Locations(1)), Gate(X, Locations(3)), Gate(Z, Locations(1)), Ctrl(Gate(X, Locations(1)), CtrlLocations(2)), Gate(T, Locations(3)), Gate(X, Locations(4)), Gate(X, Locations(3)), Gate(AdjointOperation{SGate}(S), Locations(1)), Gate(AdjointOperation{SGate}(S), Locations(3)), Gate(H, Locations(5)), Gate(S, Locations(4)), Gate(Z, Locations(4)))
+    circ = Chain(
+        Gate(H, Locations(2)),
+        Gate(T, Locations(4)),
+        Gate(H, Locations(1)),
+        Gate(AdjointOperation{SGate}(S), Locations(2)),
+        Gate(H, Locations(2)),
+        Gate(X, Locations(3)),
+        Gate(AdjointOperation{SGate}(S), Locations(1)),
+        Gate(Z, Locations(1)),
+        Gate(H, Locations(2)),
+        Gate(X, Locations(1)),
+        Gate(Z, Locations(1)),
+        Gate(T, Locations(5)),
+        Ctrl(Gate(X, Locations(5)), CtrlLocations(1)),
+        Gate(H, Locations(1)),
+        Gate(T, Locations(1)),
+        Ctrl(Gate(X, Locations(3)), CtrlLocations(5)),
+        Gate(H, Locations(1)),
+        Gate(X, Locations(4)),
+        Ctrl(Gate(X, Locations(5)), CtrlLocations(4)),
+        Gate(S, Locations(2)),
+        Ctrl(Gate(X, Locations(1)), CtrlLocations(3)),
+        Gate(X, Locations(2)),
+        Ctrl(Gate(X, Locations(3)), CtrlLocations(1)),
+        Gate(X, Locations(2)),
+        Gate(S, Locations(3)),
+        Gate(Z, Locations(2)),
+        Gate(Z, Locations(5)),
+        Gate(X, Locations(2)),
+        Gate(X, Locations(1)),
+        Ctrl(Gate(X, Locations(3)), CtrlLocations(5)),
+        Gate(S, Locations(4)),
+        Gate(X, Locations(3)),
+        Ctrl(Gate(X, Locations(1)), CtrlLocations(2)),
+        Gate(AdjointOperation{SGate}(S), Locations(4)),
+        Gate(Z, Locations(2)),
+        Gate(AdjointOperation{SGate}(S), Locations(5)),
+        Ctrl(Gate(X, Locations(1)), CtrlLocations(2)),
+        Gate(Z, Locations(5)),
+        Ctrl(Gate(X, Locations(1)), CtrlLocations(4)),
+        Ctrl(Gate(X, Locations(3)), CtrlLocations(4)),
+        Gate(H, Locations(4)),
+        Gate(Z, Locations(1)),
+        Gate(X, Locations(4)),
+        Gate(Z, Locations(3)),
+        Gate(H, Locations(4)),
+        Ctrl(Gate(X, Locations(1)), CtrlLocations(4)),
+        Ctrl(Gate(X, Locations(4)), CtrlLocations(1)),
+        Gate(X, Locations(4)),
+        Gate(S, Locations(3)),
+        Gate(AdjointOperation{SGate}(S), Locations(2)),
+        Gate(Z, Locations(3)),
+        Gate(S, Locations(5)),
+        Ctrl(Gate(X, Locations(3)), CtrlLocations(5)),
+        Gate(H, Locations(2)),
+        Gate(Z, Locations(4)),
+        Gate(H, Locations(1)),
+        Gate(X, Locations(1)),
+        Gate(X, Locations(2)),
+        Ctrl(Gate(X, Locations(5)), CtrlLocations(3)),
+        Ctrl(Gate(X, Locations(1)), CtrlLocations(3)),
+        Gate(Z, Locations(4)),
+        Gate(S, Locations(5)),
+        Gate(S, Locations(5)),
+        Ctrl(Gate(X, Locations(5)), CtrlLocations(1)),
+        Gate(T, Locations(4)),
+        Gate(Z, Locations(2)),
+        Gate(X, Locations(4)),
+        Gate(H, Locations(2)),
+        Gate(AdjointOperation{SGate}(S), Locations(3)),
+        Gate(H, Locations(5)),
+        Gate(T, Locations(2)),
+        Gate(AdjointOperation{SGate}(S), Locations(5)),
+        Gate(AdjointOperation{SGate}(S), Locations(4)),
+        Gate(H, Locations(2)),
+        Gate(S, Locations(2)),
+        Gate(AdjointOperation{SGate}(S), Locations(3)),
+        Ctrl(Gate(X, Locations(5)), CtrlLocations(1)),
+        Gate(H, Locations(5)),
+        Ctrl(Gate(X, Locations(4)), CtrlLocations(3)),
+        Gate(H, Locations(4)),
+        Gate(Z, Locations(2)),
+        Gate(H, Locations(2)),
+        Gate(S, Locations(2)),
+        Gate(H, Locations(4)),
+        Ctrl(Gate(X, Locations(1)), CtrlLocations(2)),
+        Gate(X, Locations(4)),
+        Gate(H, Locations(1)),
+        Gate(AdjointOperation{SGate}(S), Locations(5)),
+        Gate(X, Locations(1)),
+        Gate(X, Locations(3)),
+        Gate(Z, Locations(1)),
+        Ctrl(Gate(X, Locations(1)), CtrlLocations(2)),
+        Gate(T, Locations(3)),
+        Gate(X, Locations(4)),
+        Gate(X, Locations(3)),
+        Gate(AdjointOperation{SGate}(S), Locations(1)),
+        Gate(AdjointOperation{SGate}(S), Locations(3)),
+        Gate(H, Locations(5)),
+        Gate(S, Locations(4)),
+        Gate(Z, Locations(4)),
+    )
     ir = @make_ircode begin end
     bir = BlockIR(ir, 5, circ)
     zxd = ZXDiagram(bir)
@@ -89,13 +188,12 @@ end
 end
 
 function random_circuit(nbits, ngates; T = 0.1, CZ = 0.0, CNOT = 0.1)
-    ir = @make_ircode begin
-    end
+    ir = @make_ircode begin end
     CLIFF = 1 - T - CZ - CNOT
     circ = Chain()
     for _ = 1:ngates
         x = rand()
-        nbits == 1 && (x = x*(CLIFF+T))
+        nbits == 1 && (x = x * (CLIFF + T))
         if x <= CLIFF
             g = rand([:X, :X, :Z, :Z, :S, :Sdag, :H, :H])
             push_gate!(circ, Val(g), rand(1:nbits))

@@ -19,7 +19,7 @@ using ZXCalculus.Utils: Phase
 # qc_tl = convert_to_chain(phase_teleportation(zxd))
 # @test length(qc_tl) == 1
 
-p = Phase(1//1)
+p = Phase(1 // 1)
 
 @test p + 1 == 1 + p == p + p
 @test p - 1 == 1 - p == p - p

@@ -39,14 +39,7 @@ add_edge!(g, 3, 4)
 add_edge!(g, 3, 5)
 add_edge!(g, 3, 6)
 ps = [0, 1, 1 // 2, 0, 0, 0]
-v_t = [
-    SpiderType.In,
-    SpiderType.X,
-    SpiderType.Z,
-    SpiderType.Out,
-    SpiderType.Out,
-    SpiderType.Out,
-]
+v_t = [SpiderType.In, SpiderType.X, SpiderType.Z, SpiderType.Out, SpiderType.Out, SpiderType.Out]
 zxd = ZXDiagram(g, v_t, ps)
 matches = match(Rule{:pi}(), zxd)
 rewrite!(Rule{:pi}(), zxd, matches)
@@ -82,14 +75,7 @@ add_edge!(g, 3, 4)
 add_edge!(g, 3, 5)
 add_edge!(g, 4, 6)
 ps = [0 // 1 for i = 1:6]
-v_t = [
-    SpiderType.In,
-    SpiderType.In,
-    SpiderType.X,
-    SpiderType.Z,
-    SpiderType.Out,
-    SpiderType.Out,
-]
+v_t = [SpiderType.In, SpiderType.In, SpiderType.X, SpiderType.Z, SpiderType.Out, SpiderType.Out]
 layout = ZXCalculus.ZX.ZXLayout(
     2,
     Dict(zip(1:6, [1 // 1, 2, 1, 2, 1, 2])),

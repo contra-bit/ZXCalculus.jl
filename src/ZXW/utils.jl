@@ -115,10 +115,7 @@ end
 
 
 function Base.show(io::IO, zxwd::ZXWDiagram{T,P}) where {T<:Integer,P}
-    println(
-        io,
-        "$(typeof(zxwd)) with $(nv(zxwd.mg)) vertices and $(ne(zxwd.mg)) multiple edges:",
-    )
+    println(io, "$(typeof(zxwd)) with $(nv(zxwd.mg)) vertices and $(ne(zxwd.mg)) multiple edges:")
     for v1 in sort!(vertices(zxwd.mg))
         for v2 in neighbors(zxwd.mg, v1)
             if v2 >= v1
@@ -376,24 +373,14 @@ Push an `M` gate to the beginning of qubit `loc` where `M` can be `:Z`, `:X`, `:
 If `M` is `:Z` or `:X`, `phase` will be available and it will push a
 rotation `M` gate with angle `phase * π`.
 """
-function pushfirst_gate!(
-    zxwd::ZXWDiagram{T,P},
-    ::Val{:Z},
-    loc::T,
-    phase::P = zero(P),
-) where {T,P}
+function pushfirst_gate!(zxwd::ZXWDiagram{T,P}, ::Val{:Z}, loc::T, phase::P = zero(P)) where {T,P}
     in_id = get_input_idx(zxwd, loc)
     @inbounds bound_id = neighbors(zxwd, in_id)[1]
     insert_spider!(zxwd, in_id, bound_id, Z(Parameter(Val(:PiUnit), phase)))
     return zxwd
 end
 
-function pushfirst_gate!(
-    zxwd::ZXWDiagram{T,P},
-    ::Val{:X},
-    loc::T,
-    phase::P = zero(P),
-) where {T,P}
+function pushfirst_gate!(zxwd::ZXWDiagram{T,P}, ::Val{:X}, loc::T, phase::P = zero(P)) where {T,P}
     in_id = get_input_idx(zxwd, loc)
     @inbounds bound_id = neighbors(zxwd, in_id)[1]
     insert_spider!(zxwd, in_id, bound_id, X(Parameter(Val(:PiUnit), phase)))
@@ -489,8 +476,7 @@ that was conntecting to outputs of d1 and inputs of d2.
 Assuming you don't concatenate two empty circuit ZXWDiagram
 """
 function concat!(d1::ZXWDiagram{T,P}, d2::ZXWDiagram{T,P}) where {T,P}
-    nout(d1) != nin(d2) &&
-        error("Number of outputs of d1 and inputs of d2 must be the same")
+    nout(d1) != nin(d2) && error("Number of outputs of d1 and inputs of d2 must be the same")
 
     v2tov1 = Dict{T,T}()
     import_non_in_out!(d1, d2, v2tov1)
@@ -563,11 +549,7 @@ end
 """
 Add non input and output spiders of d2 to d1, modify d1. Record the mapping of vertex indices.
 """
-function import_non_in_out!(
-    d1::ZXWDiagram{T,P},
-    d2::ZXWDiagram{T,P},
-    v2tov1::Dict{T,T},
-) where {T,P}
+function import_non_in_out!(d1::ZXWDiagram{T,P}, d2::ZXWDiagram{T,P}, v2tov1::Dict{T,T}) where {T,P}
     for v2 in vertices(d2.mg)
         new_v = @match spider_type(d2, v2) begin
             Input(q) => nothing
@@ -585,11 +567,7 @@ end
 """
 Import edges of d2 to d1, modify d1
 """
-function import_edges!(
-    d1::ZXWDiagram{T,P},
-    d2::ZXWDiagram{T,P},
-    v2tov1::Dict{T,T},
-) where {T,P}
+function import_edges!(d1::ZXWDiagram{T,P}, d2::ZXWDiagram{T,P}, v2tov1::Dict{T,T}) where {T,P}
     for edge in edges(d2.mg)
         src, dst, emul = edge.src, edge.dst, edge.mul
         add_edge!(d1.mg, v2tov1[src], v2tov1[dst], emul)
@@ -648,10 +626,7 @@ end
 """
 Replace symbols in ZXW Diagram with specific values
 """
-function substitute_variables!(
-    zxwd::ZXWDiagram{T,P},
-    sbd::Dict{Symbol,<:Number},
-) where {T,P}
+function substitute_variables!(zxwd::ZXWDiagram{T,P}, sbd::Dict{Symbol,<:Number}) where {T,P}
     for (θ, val) in sbd
         for negative in [false, true]
             matched_pos = symbol_vertices(zxwd, θ; neg = negative)

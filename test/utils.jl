@@ -108,8 +108,7 @@ end
     @test String(take!(io)) == "S_7{W}"
 
     print_spider(io, zxwd, new_v2)
-    @test String(take!(io)) ==
-          "S_8{phase = Parameter.PiUnit(pu=3//2, pu_type=Rational{Int64})}"
+    @test String(take!(io)) == "S_8{phase = Parameter.PiUnit(pu=3//2, pu_type=Rational{Int64})}"
 
     new_v3 = ZXW.add_spider!(zxwd, Z(Parameter(Val(:Factor), 1)), [2, 3])
     print_spider(io, zxwd, new_v3)

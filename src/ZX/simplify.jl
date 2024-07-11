@@ -99,9 +99,9 @@ function full_reduction(bir::BlockIR)
     return BlockIR(bir.parent, bir.nqubits, chain)
 end
 
-function compose_permutation(p1::Dict{Int, Int}, p2::Dict{Int, Int})
+function compose_permutation(p1::Dict{Int,Int}, p2::Dict{Int,Int})
     p2 = copy(p2)
-    p = Dict{Int, Int}()
+    p = Dict{Int,Int}()
     for (k1, v1) in p1
         if haskey(p2, v1)
             p[k1] = p2[v1]
@@ -116,24 +116,24 @@ function compose_permutation(p1::Dict{Int, Int}, p2::Dict{Int, Int})
     return p
 end
 
-map_locations(d::Dict{T, T}, g::Gate) where {T <: Integer} = 
+map_locations(d::Dict{T,T}, g::Gate) where {T<:Integer} =
     Gate(g.operation, map_locations(d, g.locations))
-map_locations(d::Dict{T, T}, cg::Ctrl) where {T <: Integer} = 
+map_locations(d::Dict{T,T}, cg::Ctrl) where {T<:Integer} =
     Ctrl(map_locations(d, cg.gate), map_locations(d, cg.ctrl))
-map_locations(d::Dict{T, T}, locs::Locations) where {T <: Integer} =
+map_locations(d::Dict{T,T}, locs::Locations) where {T<:Integer} =
     Locations(Tuple(haskey(d, i) ? d[i] : i for i in locs.storage))
-map_locations(d::Dict{T, T}, locs::CtrlLocations) where {T <: Integer} =
+map_locations(d::Dict{T,T}, locs::CtrlLocations) where {T<:Integer} =
     CtrlLocations(map_locations(d, locs.storage))
 
 function simplify_swap!(qc::Chain; replace_swap::Bool = true)
     chain_after_swap = Chain()
-    loc_map = Dict{Int, Int}()
+    loc_map = Dict{Int,Int}()
     while length(qc.args) > 0
         g = pop!(qc.args)
         if g isa Gate
             if g.operation === SWAP
                 loc1, loc2 = plain(g.locations)[1:2]
-                loc_map = compose_permutation(Dict{Int, Int}(loc1 => loc2, loc2 => loc1), loc_map)
+                loc_map = compose_permutation(Dict{Int,Int}(loc1 => loc2, loc2 => loc1), loc_map)
                 continue
             end
         end
@@ -150,7 +150,7 @@ function simplify_swap!(qc::Chain; replace_swap::Bool = true)
     return qc
 end
 
-function generate_swap(loc_map::Dict{T, T}) where {T <: Integer}
+function generate_swap(loc_map::Dict{T,T}) where {T<:Integer}
     perm = copy(loc_map)
     subperms = []
     while length(perm) > 0
@@ -166,7 +166,7 @@ function generate_swap(loc_map::Dict{T, T}) where {T <: Integer}
 
     qc_swap = []
     for subperm in subperms
-        for k in 2:length(subperm)
+        for k = 2:length(subperm)
             push!(qc_swap, Gate(SWAP, Locations((subperm[1], subperm[k]))))
         end
     end
@@ -184,7 +184,7 @@ function replace_swap!(chain_swap::Chain, chain_after_swap::Chain)
         while j <= length(qc_after_swap)
             g = qc_after_swap[j]
             j += 1
-            if g isa Ctrl 
+            if g isa Ctrl
                 if g.gate === X && length(g.gate.locations) == 1 && length(g.ctrl) == 1
                     loc = plain(g.gate.locations)[]
                     ctrl = plain(g.ctrl.storage)[]

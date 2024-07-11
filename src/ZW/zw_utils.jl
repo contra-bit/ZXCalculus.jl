@@ -203,8 +203,7 @@ function add_spider!(
 
     make_hole!(zwd.pmg, f_id)
     connect = connect[sortperm([findfirst(x -> x == i, he_on_face) for i in connect])]
-    he_new =
-        add_vertex_and_facet_to_boarder!(zwd.pmg, prev(zwd.pmg, connect[1]), connect[1])
+    he_new = add_vertex_and_facet_to_boarder!(zwd.pmg, prev(zwd.pmg, connect[1]), connect[1])
     v_new = dst(zwd.pmg, he_new)
     zwd.st[v_new] = spider
 
@@ -223,11 +222,7 @@ Insert a spider `spider` with appropriate parameter on the half-edge prior to `h
 v1 <- he1 - v2 becomes
 v1 <- he1 - v2 <- he_new - v_new
 """
-function insert_spider!(
-    zwd::ZWDiagram{T,P},
-    he1::T,
-    spider::ZWSpiderType,
-) where {T<:Integer,P}
+function insert_spider!(zwd::ZWDiagram{T,P}, he1::T, spider::ZWSpiderType) where {T<:Integer,P}
     he_new = split_edge!(zwd.pmg, he1)
     v_new = dst(zwd.pmg, he_new)
     zwd.st[v_new] = spider

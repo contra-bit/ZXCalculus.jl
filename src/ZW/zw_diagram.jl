@@ -39,17 +39,11 @@ struct ZWDiagram{T<:Integer,P}
     end
 end
 
-ZWDiagram(
-    pmg::PlanarMultigraph{T},
-    st::Dict{T,ZWSpiderType},
-    scalar::Scalar{P},
-) where {T,P} = ZWDiagram{T,P}(pmg, st, scalar)
+ZWDiagram(pmg::PlanarMultigraph{T}, st::Dict{T,ZWSpiderType}, scalar::Scalar{P}) where {T,P} =
+    ZWDiagram{T,P}(pmg, st, scalar)
 
-ZWDiagram(
-    pmg::PlanarMultigraph{T},
-    st::Vector{ZWSpiderType},
-    scalar::Scalar{P},
-) where {T,P} = ZWDiagram{T,P}(pmg, Dict(zip(sort!(vertices(pmg)), st)), scalar)
+ZWDiagram(pmg::PlanarMultigraph{T}, st::Vector{ZWSpiderType}, scalar::Scalar{P}) where {T,P} =
+    ZWDiagram{T,P}(pmg, Dict(zip(sort!(vertices(pmg)), st)), scalar)
 
 """
     ZWDiagram(nbits::T, ::Type{P}) where {T<:Integer}

@@ -152,9 +152,7 @@ end
     int_subb = substitute_variables!(int_dbdiff, Dict(:a => a, :b => b))
     int_valb = real(Matrix(int_subb)[1, 1])
 
-    A = real(
-        Matrix(substitute_variables!(copy(dbdiff_zxwd), Dict(:a => a, :b => 0.0)))[1, 1],
-    )
+    A = real(Matrix(substitute_variables!(copy(dbdiff_zxwd), Dict(:a => a, :b => 0.0)))[1, 1])
     @test isapprox(int_valb, A / 2; atol = 1e-10)
 end
 

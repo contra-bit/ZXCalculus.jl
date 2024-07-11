@@ -2,7 +2,7 @@
     phase_teleportation(zxd)
 Reducing T-count of `zxd` with the algorithms in [arXiv:1903.10477](https://arxiv.org/abs/1903.10477).
 """
-function phase_teleportation(cir::ZXDiagram{T, P}) where {T, P}
+function phase_teleportation(cir::ZXDiagram{T,P}) where {T,P}
     zxg = ZXGraph(cir)
     ncir = zxg.master
 

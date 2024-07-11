@@ -5,10 +5,9 @@ using ZXCalculus: ZXW
 
 @testset "ZXWSpiderType" begin
 
-    spider_vec =
-        [Z(Parameter(Val(:PiUnit), 3)) Z(Parameter(Val(:Factor), exp(im * 1.5 * π))) X(
-            Parameter(Val(:PiUnit), 3),
-        ) X(Parameter(Val(:Factor), exp(im * 0.5 * π))) W H D Input(10) Output(2)]
+    spider_vec = [Z(Parameter(Val(:PiUnit), 3)) Z(Parameter(Val(:Factor), exp(im * 1.5 * π))) X(
+        Parameter(Val(:PiUnit), 3),
+    ) X(Parameter(Val(:Factor), exp(im * 0.5 * π))) W H D Input(10) Output(2)]
 
     @test spider_vec[1].p == Parameter(Val(:PiUnit), 3)
     @test spider_vec[2].p == Parameter(Val(:Factor), exp(im * 1.5 * π))
@@ -24,10 +23,7 @@ end
     g = Multigraph([0 1 0; 1 0 1; 0 1 0])
     st = [Z(Parameter(Val(:PiUnit), (-10 * i + 1) // 2)) for i = 1:3]
 
-    @test_throws ErrorException("There should be a type for each spider!") ZXWDiagram(
-        g,
-        st[1:2],
-    )
+    @test_throws ErrorException("There should be a type for each spider!") ZXWDiagram(g, st[1:2])
 
     zxwd_vec = ZXWDiagram(g, st)
     zxwd_st = [zxwd_vec.st[v] for v in sort!(vertices(g))]

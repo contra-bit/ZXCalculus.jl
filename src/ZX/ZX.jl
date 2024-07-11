@@ -9,8 +9,7 @@ using ..Utils: Scalar, Phase, add_phase!
 
 import ..Utils: add_power!
 
-export spiders,
-    tcount, spider_type, phase, rem_spider!, rem_spiders!, pushfirst_gate!, push_gate!
+export spiders, tcount, spider_type, phase, rem_spider!, rem_spiders!, pushfirst_gate!, push_gate!
 
 export SpiderType, EdgeType
 export AbstractZXDiagram, ZXDiagram, ZXGraph
